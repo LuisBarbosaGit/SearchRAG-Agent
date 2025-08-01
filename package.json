@@ -1,0 +1,33 @@
+{
+  "name": "openhpro",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx tsc-watch --onSuccess \"node ./lib/index.js\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.10",
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.1.0",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "tsc-watch": "^7.1.1",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@huggingface/inference": "^4.6.1",
+    "@langchain/community": "^0.3.49",
+    "@langchain/core": "^0.3.66",
+    "@langchain/pinecone": "^0.2.0",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "faiss-node": "^0.5.1",
+    "langchain": "^0.3.30",
+    "pdf-parse": "^1.1.1"
+  }
+}
