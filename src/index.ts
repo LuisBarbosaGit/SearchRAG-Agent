@@ -1,18 +1,13 @@
-import express, {Request, Response} from 'express'
+import express from 'express'
+import { routes } from './routes/index';
 
-
+require('dotenv').config();
 const PORT = 3000;
 const app = express();
-app.use(express.json)
+
+routes(app)
 
 app.listen(PORT, () => {
     console.log('Server is runnig')
 })
 
-app.post("/users", (req: Request, res : Response) => {
-    let query = req.body;
-    res.send({
-        message: "Testando",
-        search: query,
-    })
-})

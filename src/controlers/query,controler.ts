@@ -1,0 +1,26 @@
+import {Request, Response} from 'express'
+import { llmModel } from '../services/answer.services';
+import { mainServices } from '../services/answer.services';
+
+export class MainControler{
+
+    static async sendQuery(req: Request, res : Response){
+        let query = req.body.query;
+        const response = await new mainServices().manageSearch(query)
+
+        res.send({
+        message: "Success",
+        response: response,
+    })}
+
+    static getConfig(req :Request, res: Response){
+        res.send({
+            version: "0.1v",
+            llm: llmModel.model.toString(),
+            vectorStore: "faiss"
+        })
+    }
+    static getStatus(req :Request, res: Response){
+        res.send("Server is running")
+    }
+}

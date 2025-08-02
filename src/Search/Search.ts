@@ -1,9 +1,9 @@
 import 'dotenv/config';
-import { load} from './loader'
+import { load} from '../loader/loader'
 import fs from 'fs/promises'
-import { faissPath } from './database/config';
+import { faissPath } from '../database/config';
 
-export async function search(query : string) {
+export async function searchChunks(query : string) {
     const shouldRecreate = process.argv.includes('--recreate');
 
     if (shouldRecreate) {
@@ -12,6 +12,7 @@ export async function search(query : string) {
     }
 
     const SearchStore = await load();
+    console.log("Success create")
     const results =  await SearchStore.similaritySearchWithScore(query, 5);
     return results;
 }
