@@ -3,12 +3,11 @@ import { llmModel } from '../services/answer.services';
 import { mainServices } from '../services/answer.services';
 
 export class MainControler{
-
-    static async sendQuery(req: Request, res : Response){
+    static async processQuery(req: Request, res : Response){
         let query = req.body.query;
         const response = await new mainServices().manageSearch(query)
-
         res.send({
+        question: query,
         message: "Success",
         response: response,
     })}
@@ -16,10 +15,11 @@ export class MainControler{
     static getConfig(req :Request, res: Response){
         res.send({
             version: "0.1v",
-            llm: llmModel.model.toString(),
+            llmResponse: llmModel.model.toString(),
             vectorStore: "faiss"
         })
     }
+
     static getStatus(req :Request, res: Response){
         res.send("Server is running")
     }

@@ -5,8 +5,10 @@ import fs from "fs/promises";
 import path from "path";
 export const faissPath = path.resolve(process.cwd(), "faiss_index")
 
+//intfloat/e5-large-v2
+
 export const ebbeddings = new HuggingFaceInferenceEmbeddings({
-    model: "intfloat/e5-large-v2",
+    model: "sentence-transformers/all-MiniLM-L6-v2",
     apiKey: process.env.HUGGING_FACE_HUB_TOKEN,
     provider:"hf-inference",
 })

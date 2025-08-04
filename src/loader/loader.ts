@@ -2,7 +2,7 @@ import path from "node:path";
 import { DirectoryLoader } from "langchain/document_loaders/fs/directory";
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { TextLoader } from "langchain/document_loaders/fs/text";
-import { TokenTextSplitter } from "langchain/text_splitter";
+import { RecursiveCharacterTextSplitter} from "langchain/text_splitter";
 import { getVectorStore } from "../database/config";
 
 const loader = new DirectoryLoader(
@@ -12,15 +12,14 @@ const loader = new DirectoryLoader(
         '.txt': (filePath) => new TextLoader(filePath)
     }
 )
-
-export async function load() {
+//Chunk Options
+export async function loadDocuments() {
     const docs = await loader.load()
-    const splitter = new TokenTextSplitter({
-        encodingName: "cl100k_base",
-        chunkSize: 600,
-        chunkOverlap: 20,
+    const splitter = new RecursiveCharacterTextSplitter({
+        chunkSize: 1000,
+        chunkOverlap: 150,
+        separators: ["\n\n", "\n", " ", ""],  
     })
-    
     //Chunk Documents
     const chunks = await splitter.splitDocuments(docs);
     //Create or receive vectorStore

@@ -1,0 +1,75 @@
+Documentação Técnica: Conceitos Fundamentais da Web
+Este documento descreve os princípios e componentes essenciais que governam o funcionamento da World Wide Web. O objetivo é fornecer uma base conceitual clara sobre a interação entre usuários, navegadores e servidores.
+
+1. O Modelo Cliente-Servidor
+A web opera fundamentalmente no modelo cliente-servidor, que define dois papéis distintos:
+
+Cliente (Client): É o software que o usuário utiliza para acessar a web. Geraltemente, é um navegador (como Google Chrome, Firefox, Edge). A principal função do cliente é iniciar requisições para obter informações.
+
+Servidor (Server): É um computador ou sistema de computadores que armazena os dados (sites, imagens, arquivos) e aguarda por requisições dos clientes. Quando uma requisição é recebida, o servidor a processa e envia uma resposta de volta para o cliente.
+
+O fluxo é sempre iniciado pelo cliente: Cliente pede ➔ Servidor responde.
+
+2. Endereços na Web: URL e DNS
+Para que um cliente possa encontrar um servidor, ele utiliza um sistema de endereçamento padronizado.
+
+URL (Uniform Resource Locator): É o endereço completo e específico de um recurso na internet. Uma URL é composta por várias partes:
+
+Protocolo: https:// - Define as regras da comunicação (neste caso, HTTP seguro).
+
+Domínio: www.exemplo.com - O nome legível que identifica o servidor.
+
+Caminho (Path): /produtos/item123 - Especifica o recurso exato dentro do servidor.
+
+DNS (Domain Name System): É o "catálogo de endereços" da internet. Como os computadores se comunicam usando números (endereços IP, ex: 192.168.1.1), o DNS é o sistema responsável por traduzir os nomes de domínio legíveis por humanos (como www.exemplo.com) para o endereço IP do servidor correspondente.
+
+3. O Protocolo de Comunicação: HTTP e HTTPS
+A "linguagem" ou o conjunto de regras que clientes e servidores usam para se comunicar é o protocolo HTTP.
+
+HTTP (Hypertext Transfer Protocol): Define o formato das mensagens de requisição e resposta, incluindo os tipos de solicitações que podem ser feitas (métodos) e os códigos de status das respostas.
+
+HTTPS (HTTP Secure): É a versão segura do HTTP. Ele adiciona uma camada de criptografia (SSL/TLS) à comunicação, garantindo que os dados trocados entre o cliente e o servidor sejam privados e íntegros. É o padrão atual da web, identificado pelo ícone de cadeado no navegador.
+
+4. A Conversa: Requisição e Resposta (Request & Response)
+Toda interação na web consiste em um par de mensagens: uma requisição e uma resposta.
+
+Requisição HTTP (Request): A mensagem enviada pelo cliente ao servidor. Contém:
+
+Método (Verbo): A ação que o cliente deseja realizar. Os principais são:
+
+GET: Solicita dados de um recurso (ex: carregar uma página).
+
+POST: Envia dados para o servidor para criar um novo recurso (ex: submeter um formulário).
+
+PUT: Envia dados para atualizar completamente um recurso existente.
+
+DELETE: Solicita a remoção de um recurso.
+
+Cabeçalhos (Headers): Metadados sobre a requisição (ex: Content-Type: application/json).
+
+Corpo (Body/Payload): Os dados que estão sendo enviados, utilizado principalmente em requisições POST e PUT.
+
+Resposta HTTP (Response): A mensagem enviada pelo servidor de volta ao cliente. Contém:
+
+Código de Status (Status Code): Um número de 3 dígitos que indica o resultado da requisição.
+
+2xx (Sucesso): 200 OK (requisição bem-sucedida).
+
+3xx (Redirecionamento): 301 Moved Permanently.
+
+4xx (Erro do Cliente): 404 Not Found (recurso não encontrado), 403 Forbidden (acesso negado).
+
+5xx (Erro do Servidor): 500 Internal Server Error (o servidor encontrou um problema).
+
+Cabeçalhos (Headers): Metadados sobre a resposta (ex: Content-Type: text/html).
+
+Corpo (Body): O conteúdo do recurso solicitado (ex: o código HTML de uma página, os dados de um JSON).
+
+5. APIs (Application Programming Interfaces)
+Uma API é uma interface que permite que diferentes sistemas de software se comuniquem entre si de forma estruturada. No contexto da web:
+
+APIs Web (ou Web Services): Utilizam o protocolo HTTP para a comunicação.
+
+Diferença para um site: Enquanto a requisição a um site geralmente retorna um documento visual (HTML, CSS, JS), uma requisição a uma API geralmente retorna apenas dados brutos, comumente no formato JSON (JavaScript Object Notation).
+
+Utilidade: Permitem que aplicações (como um programa Delphi, um aplicativo de celular ou outro servidor) consumam e manipulem dados de um sistema sem precisar de uma interface gráfica. O código enviaHttpPedido que você criou é um exemplo de um cliente consumindo uma API.

@@ -1,0 +1,368 @@
+Estrutura de um projeto
+
+A estrutura de um projeto em Delphi é composta pelos arquivos DPR (arquivo de projeto Delphi), PAS (arquivos-fonte com código em pascal - conhecido também como unit), DFM (arquivos-fonte que representam o formulário associado ao arquivo PAS), DCU (código-objeto gerado a partir dos arquivos PAS e DFM) e RES (arquivo de recursos do projeto - onde é armazenado o ícone do projeto, exemplo).
+
+Processo de compilação = DPR + RES + PAS + DFM = DCU
+Processo de link-edição = DCU + (arquivos da biblioteca do Delphi) = EXE
+
+Nota: Todos os arquivos iniciados com o sinal ~ (til) são arquivos de backup e podem ser apagados. Os demais arquivos geralmente não são relevantes, mas é recomendado não excluir nenhum arquivo contido na pasta do projeto.
+
+Tipos de Dados
+
+O Delphi oferece uma vasta lista de tipos de dados. Esses tipos de dados podem ser divididos em categorias. Para maiores informações sobre a representação desses tipos de dados, recomenda-se buscar a documentação da versão do Delphi com a qual se está trabalhando. As versões mais modernas do Delphi oferecem as seguintes categorias:
+Representação de números inteiros
+oByte
+oShortInt
+oWord
+oSmallInt
+oCardinal
+oLongWord
+oFixedUInt
+HPro-oInteger	 
+oLongInt
+oFixedInt
+oUInt64
+oInt64
+oNativeUInt
+oNativeInt
+Representação de número com ponto-flutuante
+oSingle
+oDouble
+oExtended
+HPro-oCurrency	
+HPro-oReal		 
+Representações de Strings e Caracteres
+oAnsiChar
+oChar
+oWideChar
+oAnsiString
+oRawByteString
+oUnicodeString
+HPro-oString		 
+oShortString
+oWideString
+Representação de arquivos
+oFile
+oTextFile, Text
+Representação de tipos de dados lógicos
+HPro-oBoolean	 
+oByteBool
+oWordBool
+oLongBool
+Outros tipos de dados
+HPro-oArray		 
+HPro-oRecord	
+oVariant
+oPointer
+
+Tabelas do banco de dados:
+	As tabelas são armazenadas em arquivos com a extensão DAT, os índices (TODOS) são armazenados em um único arquivo com a extensão IDX e o(s) campo(s) memo (se existirem) são armazenados em um único arquivo com a extensão BLB. Se não existirem campos memo não existirá o arquivo com a extensão BLB.
+
+	Para o ElevateDB basta acrescendar um “e“ como prefixo ficando como eDat, eBlb, eIdx.
+
+Tipos de dados: Os tipos de dados utilizados pelo DBISAM podem ser resumidos nos seguintes: 
+Integer-para representar números inteiros
+BCD-para representar números com até 4 casas decimais com precisão
+Float-para representar números com o maior número de casas decimais, porém o mesmo deverá ser evitado, visto que poderemos estar visualizando 2,00 na tela e o valor armazenado no campo ser 1,99999999999999999999)
+Date-para representar datas
+String-para representar campos caracteres com tamanho fixo de caracteres
+Memo-idem ao campo string sem quantidade de caracteres definida
+
+Transações: É um processo que visa a garantia de conclusão completa de um conjunto de instruções para atualizações de tabelas. Em outras palavras, define-se o início da transação (usando D.Transaction), efetua-se o processamento das atualizações de tabelas (quantos forem necessários) e em seguida finaliza-se a transação (usando D.Commit). Se houver qualquer erro ou interrupção do processo o banco de dados automaticamente efetuará um ROLLBACK (cancelamento de transação) e o estado do banco de dados volta a situação imediatamente anterior ao início da transação.
+
+Concorrência de acesso aos dados: Atualmente é quase impossível pensar em um sistema de informação que seja utilizado por apenas um único usuário. Os sistemas atuais são utilizados por vários usuários simultaneamente e a situação de concorrência durante o acesso aos dados é muito comum. O que ocorre com muita frequência é a inclusão simultânea de dados de um mesmo módulo por 2 ou mais usuários. O próprio banco de dados gera um erro quando ocorrer duplicidade de chave primária, porém se quisermos evitar o aparecimento da mensagem de erro ao usuário e o módulo em questão permitir, o componente HPROTABLE poderá gerar a próxima chave disponível fazendo com que o processo fique transparente para os usuários. Para definir este comportamento basta inserir o código Tabela.AutoPrimaryKey := True imediatamente antes de se chamar o método Tabela.Post. Exemplo: 4 usuários iniciam a inclusão de um cliente e o sistema sugere código 1 para os 4 usuários. Se a propriedade AutoPrimaryKey estiver em False, o segundo usuário a gravar receberá uma mensagem de erro informando que o registro já foi incluído por outro usuário, mas se o mesmo estiver em True, então os 4 usuários obterão sucesso durante a inclusão gerando os códigos 1, 2, 3, 4 conforme o acesso de cada um deles. Para o processo em que 2 ou mais usuários acessem o mesmo registro de uma mesma tabela ao mesmo tempo para edita-lo ou excluí-lo, então o primeiro usuário obterá sucesso, e os demais receberão a mensagem “Registro alterado ou excluído por outro usuário”.
+	
+Validação de campos/formulários: Praticamente está se tornando um padrão não validar os campos durante a digitação do usuário. Em programação para ambiente não gráfico (DOS) esta validação era mais simples pois somente o teclado estava disponível para o usuário fazendo com que a validação acontecesse imediatamente a digitação de um campo pelo usuário. Porém com o Windows a utilização do mouse pode mudar o foco do campo em questão para outro campo gerando inúmeras possibilidades de validação e se tornando complexo. Sempre que for possível a validação deverá ocorrer no botão Gravar ou OK. Isto é, deixe o usuário digitar o que ele quiser. Após ele clicar no botão Gravar ou OK o sistema terá TOTAL controle sobre o processo e as validações poderão ser efetuadas uma única vez
+	
+Integridade referencial: Esta é uma característica de um bom banco de dados. A integridade referencial evitará por exemplo a exclusão de um cliente que já foi utilizado para emissão de notas fiscais, a exclusão de um produto que já foi utilizado para o estoque, etc. Para que isto seja possível é importante ao definirmos cada campo de uma tabela se ele tem associação com outra tabela. No exemplo acima, quando falamos em itens da nota fiscal, devemos referenciar o cadastro de produto. Desta maneira quando da exclusão de um produto o sistema irá verificar a sua existência no cadastro de itens de notas fiscais, se existir o sistema emitirá um aviso ao usuário informando que o registro NÃO poderá ser excluído devido ao fato de existir vínculos com outras tabelas.
+	
+Campos obrigatórios: Preferencialmente os campos obrigatórios devem ser definidos diretamente no Genfiles, isto é, deverão ser controlados internamente pelo DBISAM. Porém existem casos em que o usuário solicita o bloqueio de um determinado campo com a tabela já contendo dados. Nestes casos, o bloqueio deverá estar dentro do programa e será responsabilidade do programador. Se por engano for definido campo obrigatório no banco de dados e o mesmo possuir registros em que este campo NÃO contenha informação, estes serão eliminados.
+	
+Excluindo registros: Após a exclusão de um registro, o DBISAM não permite a recuperação do mesmo. Internamente o mesmo é marcado como excluído e será utilizado pelo DBISAM quando de uma nova inclusão. Porém em determinados casos onde existem muitas exclusões e poucas inclusões, o arquivo permanecerá com o mesmo tamanho no disco. Se houver necessidade de realmente eliminar o espaço ocupado pelos registros excluídos pode-se aplicar o método Tabela.OptimizeTable. Porém este método é muito pouco utilizado e o mesmo deverá ser utilizado em casos extremos.
+	
+Índices: O DBISAM é um banco de dados extremamente rápido. Porém o mesmo deverá ter índices disponíveis para efetuar o processamento com rapidez. Para referenciar mais de um campo em um índice deve-se utilizar o sinal ; para separar os campos. Exemplo: CLI;DAT referenciará os campos CLI e DAT. Um outro comentário importante a fazer é em relação à utilização dos índices durante o processamento de instruções SQL. O DBISAM utiliza somente o primeiro campo de QUALQUER índice para otimizar a pesquisa. Portanto para uma pesquisa envolvendo o campo CLI, (conforme o exemplo acima) o SQL será otimizado; porém se houver pesquisa no campo DAT o mesmo NÃO será otimizado, fazendo com que outro índice deva ser criado iniciando com o campo DAT.
+	
+FindKey x Locate: Estes métodos são utilizados para localizar registros em tabelas ou queries. O método FindKey funciona somente em tabelas enquando que o Locate funciona tanto em tabelas quanto em queries. Enquanto o método FindKey utiliza o índice atual da tabela para pesquisar, o método Locate utiliza o índice se o mesmo existir, mas se não for encontrado índice para otimizar a pesquisa, então a pesquisa será feita registro a registro, tornando-a muito lenta.
+	
+Utilizando faixas de dados (RANGE): Este método é utilizado para “extrairmos” uma faixa de dados de uma determinada tabela. A tabela necessariamente precisa estar indexada pelo campo que será utilizado para definir a faixa. O método utilizado é o SETRANGE e o método utilizado para cancelar a faixa é o CANCELRANGE. Deve-se lembrar que após o RANGE, o índice NÃO poderá ser mudado pois caso isto acontecer o RANGE é automaticamente cancelado. Outra consideração importante é que todos os métodos na tabela utilizada funcionarão somente dentro da faixa definida. First, Last, Next, Prior, Eof, Bof, FindKey, Locate somente pesquisarão na faixa extraída da tabela. 
+
+Mudando o ponteiro de registros: Para mudarmos o ponteiro de registros em uma tabela ou query devemos usar os seguintes métodos: First (posiciona no primeiro registro do índice ativo) , Next (move o ponteiro para o próximo registro do índice ativo), Prior (move o ponteiro para o registro anterior do índice ativo), Last (move o ponteiro para o último registro do índice ativo). As flags BOF e EOF somente serão ativadas quando estar posicionado no primeiro registro e tentar mover para o anterior (flag BOF será ligado), ou quando estivermos no último registro e tentarmos mover para o próximo (flag EOF será ligado).
+
+Tabelas x Queries: Uma dúvida muito comum é quando devemos usar um e quando devemos usar o outro. A princípio devemos usar tabelas para efetuar a manutenção de dados nas tabelas. Para efetuarmos consultas, onde poderemos aplicar os mais diversos critérios e ordens possíveis, devemos utilizar as queries pois serão mais eficientes além de possibilitar constantes ajustes (conforme as solicitações dos usuários). Devemos lembrar que SEMPRE o acesso utilizando tabelas será mais rápido, porém mais trabalhoso em alguns casos. Deve-se planejar o que será feito e decidir qual será melhor para utilizar. Não existe uma regra geral que resolva todos os casos. Para o caso das queries não podemos esquecer da otimização dos índices que foi citada anteriormente. Se não existirem índices para agilizar o processo então o processamento será EXTREMAMENTE lento.
+	
+Filtros: Apesar de existir no DBISAM, deve-se evitar o uso de filtros. Na grande maioria dos casos conseguimos obter os resultados desejados utilizando Tabelas com índices ou códigos SQL. Porém o recurso do filtro está disponível através do evento OnFilterRecord.
+
+Campos calculados (virtuais) X Join (SQL com mais de 1 tabela): Por questões de desempenho, muitas vezes podemos evitar a situação de utilizar o SQL com mais de uma tabela. Para isto podemos e devemos estar utilizando os campos calculados nas queries. Somente será necessário efetuar SQL com mais de uma tabela 	quando existir a necessidade de ordenar o resultado pelos campos de outras tabelas.
+
+MODELO E-R (CONCEITO E APLICAÇÃO)	
+É um modelo abstrato cuja finalidade é descrever, de maneira conceitual, os dados a serem utilizados em um Sistema de Informações ou que pertencem a um domínio. A principal ferramenta do modelo é sua representação gráfica, o Diagrama Entidade Relacionamento. Normalmente o modelo e o diagrama são conhecidos por suas siglas: MER e DER.
+Existem muitas notações para Diagrama de Entidades e Relacionamentos. A notação original é composta de entidades (retângulos), relacionamentos (losangos), atributos (círculos) e linhas de conexão (linhas) que indicam a cardinalidade de uma entidade em um relacionamento.
+Os tipos de relações utilizadas neste diagrama são:
+Relação 1..1 (lê-se relação um para um) - indica que as tabelas têm relação unívoca entre si. Você escolhe qual tabela vai receber a chave estrangeira;
+Relação 1..n (lê-se um para muitos) - a chave primária da tabela que tem o lado 1 vai para a tabela do lado N. No lado N ela é chamada de chave estrangeira;
+Relação n..n (lê-se muitos para muitos) - quando tabelas têm entre si relação n..n, é necessário criar uma nova tabela com as chaves primárias das tabelas envolvidas, ficando assim uma chave composta, ou seja, formada por diversos campos-chave de outras tabelas. A relação então se reduz para uma relação 1..n, sendo que o lado “n” ficará com a nova tabela criada.
+
+GenAplic 
+Tem como objetivo gerar o programa inicial para o início do desenvolvimento de um projeto. Ele é responsável por definir o nome do arquivo de projeto (DPR), o nome do sistema, o título da aplicação e criação da pasta onde serão hospedados TODOS os arquivos do projeto (se a mesma não existir).
+
+GenFiles
+Tem como objetivo gerar uma documentação do projeto, especificando tabelas, campos, índices, integridade referencial além de ser um gerador de código completo. Todas as rotinas relacionadas com a criação de tabelas, criação e/ou alteração de campos, criação e/ou alteração de índices, reorganização de arquivos, máscaras, campos obrigatórios, além de outros recursos são automaticamente gerados por este utilitário.
+
+GenForm
+Gerador de formulários completo. Baseado nas informações inseridas, gera todo o código para agilizar o desenvolvimento de um projeto. Desta forma o foco do desenvolvedor estará apenas na solução do problema.
+
+DBM – Database Manager
+Utilitário com o objetivo de gerenciar todo o banco de dados com suas tabelas, campos e índices de maneira direta, permitindo a criação de novas tabelas, alteração na estrutura das mesmas, criação e/ou atualização de índices e reparação de tabelas com problemas. Possui diversos recursos práticos para o desenvolvedor localizar registros, mudar o índice ativo, executar “ranges”, filtrar a tabela, gerar código SQL, executar códigos SQL, dentre muitos outros recursos. É o gerenciador do banco de dados DBISAM.
+
+eDBM – Database Manager
+É o equivalente ao DBM mas para o banco de dados ELEVATEDB.
+
+RPServer
+Serviço instalado junto com o aplicativo servidor do banco de dados. É utilizado para processamento de funções diretamente na base de dados sem envolver tráfego de rede. Utilizado também para efetuar tarefas agendadas, processamentos noturnos,etc.
+
+HProEdit
+Editor de textos multi-janelas com diversos recursos interessantes para análise de arquivos texto, XML, JSON, etc. É um bloco de notas melhorado.
+
+HProWS, HWServer (antigo)
+Servidor web desenvolvido integralmente pela HPro Informática.  Características:
+alta disponibilidade (multi-thread) e funciona como serviço do Windows
+provê integração entre a Internet e o banco de dados interno utilizando como linguagem o Delphi padrão (com todos os recursos necessários);
+utiliza poucos recursos do equipamento (memória e processamento);
+
+Diretrizes
+Nunca usar Range em tabelas do DataModulo
+Nunca mudar o índice de tabelas do DataModulo
+Nunca programar no DataModulo
+Grids devem sempre estar ligados a tabelas locais
+Tabelas sempre devem ser abertas no evento OnCreate do formulário
+Índices devem ser definidos no momento da abertura da tabela em quase 100% das vezes
+Nomes de tabelas/campos devem seguir as recomendações (ver anexos no final deste documento)
+Em todas as consultas que contemplem valores devemos ter o botão totalizar
+Onde houver valores os mesmos deverão ser totalizados na impressão
+Ao utilizar máscaras, deve-se sempre salvar os dados sem os caracteres da máscara:
+Exemplo: 05/002 será armazenado no banco de dados como 05002.
+
+Largura de Edit/DBEdit que representam códigos (no mínimo 45 pixels)
+Largura do View (300 pixels)
+Largura de MaskEdit/DBEdit que representam datas (75 pixels)
+Largura de EditNum/DBEdit que representam valores com casas decimais (no mínimo 75 pixels)
+Máscara padrão para valores #,###,##0.00
+ComboBox (DropDownList e Largura)
+Cores/Fontes/Estilo/Tamanho
+GroupBox (título em azul)
+Grid (código + descrição)
+Situação x Consultas
+Grid (largura, barra de rolagem horizontal)
+Botão Processar atuante no FormShow
+Abreviações/Labels
+Ordem dos campos na chave primária (Genfiles)
+Continuidade do processamento x Intervenção do usuário durante a transação
+Critérios nos relatórios
+Alinhamento/Máscaras nos relatórios
+Cálculos/Qual o momento. Exemplo: Qtde x Preço Unitário – Descontos = Preço
+total
+Alinhamento de informações no Atencao
+Quando enviar e-mails dentro das rotinas
+
+A biblioteca HPro é composta de diversas units sendo que as mais importantes são as seguintes:
+HProFunc.pas – Funções básicas de utilização genérica
+HProDB.pas – Funções de acesso e controle de dados
+HProWin.pas – Funções de caráter visual atrelado aos componentes do Windows
+HProConst.pas – Utilizada para armazenar as variáveis “públicas” do sistema
+
+Resumo das funções mais importantes encontradas na unit HProFunc.pas
+Acesso: Controla direitos de acesso de processos
+Atencao: Mensagens para o usuário e confirmação do usuário
+Beep: Emite um bip padrão
+Conversão: ctod: Converte um texto em data
+Conversão: DateToSql: Converte uma data para o padrão SQL (yyyy-mm-dd) (idem a DtoSql)
+Conversão: dtoc: Converte uma data em um texto no formato dd/mm/yyyy
+DBGridColor: Para colorir uma linha de um grid de acordo com uma condição
+Empty: Retorna True se a string ou Data ou Número estiverem vazios
+Fill: Para formatação durante a geração de arquivos (lay-outs)
+FindOrder: NÃO UTILIZAR
+FirstDay: Retorna a data do primeiro dia do mês de uma data parâmetro
+FloatControl: Permite consultar um campo memo em um painel desabilitado
+FloatToSql: Converte um valor para o formato SQL (com ponto como separador decimal)
+GetPublicPar: Retorna o conteúdo de um parâmetro de sistema (sempre string)
+Hton: Converte uma string: hh:mm em número para cálculo com horas
+IsAcesso: Verifica se o usuário tem direito de processo (ou interno)
+IsCGC ou IsCNPJ: Retorna True se o CNPJ passado estiver correto
+IsCPF: Retorna True se o CPF passado estiver correto
+IsContido: Retorna true se o parâmetro está contido em um conjunto
+LastDay: Retorna a data do último dia do parâmetro data passado
+Ntoh: Usado junto com hton para cálculo com horas
+OnlyNumber: Retorna SOMENTE os números: Ex; 12/1233-44 retornará 12123344
+Parse: Extrai um texto baseado em caracteres separadores
+PerformSQL: Funções para execução rápida de SQL
+Replicate: Para repetir um caracter n vezes 
+ShowWait/HideWait: Exibe/Esconde janela de processamento para o usuário
+Spaces: Gera uma sequência com n espaços
+StrTran: Substitui um trecho do texto por outro
+Transform: Insere máscara em um texto puro
+Trunca: Arredonda valores
+UserQuery
+Valor: Obtém o valor com casas decimais de um texto
+ValorInt: Obtém o valor inteiro de um texto
+
+Devido à uma série de novos recursos que são pertinentes à HPro Informática, foi criado um componente descendente da tabela do DBISAM (TDBISAMTable). Este componente se chama HproTable e além de oferecer as propriedades, métodos e eventos do DBISAM, o mesmo oferece diversos recursos adicionais.
+Obtendo informações de campos:  Normalmente o Delphi utiliza-se de um método padrão para obter informações de uma tabela. Este método é o FieldByName mas o seu uso acarreta um texto extremamente longo.
+Ao invés de usar 
+Tabela.FieldByName(‘campo’).AsString
+Utilizamos
+Tabels.Gets(‘campo’);
+Geti (para obter inteiros) 
+Getd (para obter datas) 
+Getf (para valores com casas decimais com tipo de dados BCD ou Float)
+Gets (para campos string ou memo ) 
+Getk (para representar os valores já com as máscaras). 
+Exemplo: Tablea.Geti(´Cod´) equivalente a Tabela.FieldByName(´Cod´).AsInteger, 
+ou ainda Tabela.Getd(´Emi´) equivalente à Tabela.FieldByname(´Emi´).AsDateTime.
+
+Atribuído valores para campos: Analogamente ao método GET foram criados vários métodos PUT seguindo os mesmos critérios. 
+Ao invés de usar
+Tabela.FieldByName(´Campo´).AsInteger := nValor 
+Utilizamos 
+Tabela.Puti(´Campo´,nValor).
+Puti (para obter inteiros) 
+Putd (para obter datas) 
+Putf (para valores com casas decimais com tipo de dados BCD ou Float)
+Puts (para campos string ou memo ) 
+Putk (para representar os valores já com as máscaras).
+
+LiveResult and Canned Result: Quando utilizamos queries, existem algumas considerações que devem ficar bem claras para o desenvolvedor. Primeiramente precisamos entender o que é LiveResult. Esta propriedade somente estará disponível APÓS a execução da query sendo que LiveResult retornará se o DBISAM conseguiu obter o acesso ou não às tabelas usando índices e filtros internos e NÃO foi necessário gerar uma tabela temporária para gerar o resultado. Existem casos em que não é possível utilizar filtros na leitura das tabelas então o DBISAM cria uma tabela temporária para satisfazer as condições do WHERE e do ORDER BY, neste último caso o resultado de LiveResult é False. Quando o resultado de LiveResult é False, então dizemos que o resultado é Canned (enlatado). A principal diferença entre eles é que QUALQUER alteração em uma query com resultado Canned NÃO será refletida na tabela original. Existe uma propriedade da query que é RequestLive. Esta propriedade controla como o DBISAM tentará acessar os dados. Se RequestLive for True então o DBISAM tentará acessar diretamente as tabelas utilizando filtros internos, porém o mesmo pode não ser possível então o resultado será Canned. Se RequestLive for False então mesmo que exista a opção de se acessar diretamente as tabelas, o DBISAM criará uma tabela temporária. Quando o resultado é composto de mais de uma tabela o resultado será SEMPRE canned, isto é, SEMPRE será gerada uma tabela temporária para armazenar o resultado.
+
+Os components da aba Edulib também foram feitos para facilitar o processo de desenvolvimento e o mais importante (e mais utilizado, é o componente THProView).
+
+OnActivate
+OnButton
+OnCalcFields
+OnEmpty
+OnSelect
+
+Trecho de código para a utilização de um hproview:
+procedure VGru(hv: THProView);
+begin
+     with hv do begin
+        Title := 'Consulta grupos de materiais';
+        // Código utilizado quando o usuário digita o código ao invés de selecionar da lista
+        SqlValid := 'select des from hgru where cod=:1 and sit=''Ativo''';
+        // Código utilizado APENAS quando a tabela NÃO será editada (utilizado em históricos)
+        SqlCaption := 'select des from hgru where cod=:1';
+        // Código utilizado para EXIBIÇÃO dos dados
+        SqlShow := 'select cod, des from hgru where sit=''Ativo'' order by des nocase';
+        Query.MainTable := D.TGru;
+        Query.Clear;
+        Query.Add('Cod;Código');
+        Query.Add('Des;Descrição');
+     end;
+end;
+O evento OnActivate é utilizado para chamar/ativar o View.
+O evento OnSelect é disparado quando o usuário escolhe um item do grid ou quando o código é digitado diretamente
+
+Procedimento I – Impressão com o componente TImpressora.
+Existem 2 (dois) tipos:
+- Automática: Utilizada na maioria das vezes
+Exemplo:
+// Define-se o título do relatório
+Imp.Title := ‘Título do relatório’;
+// Orienta o componente de impressão a imprimir o que está no grid vinculado a tabela
+Imp.Columns.Assign(Tabela.PrintFields);
+// Define qual ou quais colunas deverão ser totalizadas (propriedade opcional)
+Imp.SumColumns := ‘Tot;Jur’;   // Para totalizar os campos Tot e Jur
+// Inicia o processo de impressão solicitando a escolha da impressora
+Imp.Start;
+- Manual: Devem ser utilizados os eventos OnHeader, OnDetail e OnStop 
+OnHeader: Utilizado para imprimir o cabeçalho do relatório
+OnDetail: Utilizado para imprimir o corpo do retatório
+OnStop: Utilizado para finalizar imprimindo observações, totais, etc.
+     // Evento OnHeader do componente de impressão 
+     with Imp do begin
+        Say(Row+1,10,'Número....: '+D.TPecNum.DisplayText+'  -  Data: '+EDat.Text);
+        Say(Row+1,10,'Comprador.: '+ECom.Text+' - '+CCom.Text);
+        Say(Row+1,10,'Fornecedor: '+EFor.Text+' - '+CFor.Text);
+        Say(Row+1,10,'Contato...: '+ECon.Text);
+        Say(Row+1,10,'Previsão de entrega..: '+EPre.Text);
+        Say(Row+1,10,'Condição de Pagamento: '+EPag.Text);
+        Say(Row+1,10,'Vencimentos..........: ');
+        Line;
+        Say(Row+1, 1,'Seq');
+        Say(Row  , 5,'Produto');
+        Say(Row  ,55,'Quantidade');
+        Say(Row  ,66,'P.Unitário');
+        Say(Row  ,77,'Desconto');
+        Say(Row  ,89,'P.Total');
+        Line;
+     end;
+// Evento OnDetail do componente de impressão 
+     with Imp do begin
+        Say(Row+1, 1,format('%.3d',[nSeq]));
+        Say(Row  , 5,format('%8.4n',[TIcoPro.Value]));
+        Say(Row  ,14,TIcoPDes.DisplayText);
+        Say(Row  ,56,format('%9.3n',[TIcoQtd.Value]));
+        Say(Row  ,66,format('%10.3n',[TIcoPre.Value]));
+        Say(Row  ,77,format('%8.2n',[TIcoDes.Value]));
+        Say(Row  ,86,format('%10.2n',[TIcoTot.Value]));
+     end;
+// Evento OnStop do componente de impressão 
+     with Imp do begin
+        Say(Row+2,73,'    Total =>');
+        Say(Row  ,86,format('%10.2n',[GetTotal('Tot')]));
+        
+        // Observações (se houver)
+        if D.TPec.NotEmpty(‘Obs’) then begin
+           Say(Row+2,10,'Observações: ');
+           DefMemoField(D.TPecObs, 70);
+           for nI := 0 to MemoCount-1 do begin
+              if nI = 0 then begin
+                 Say(Row,Col,MemoLine(nI));
+              end else begin
+                 Say(Row+1,10,'             '+MemoLine(nI));
+              end;
+           end;
+        end;
+        Line;
+     end
+
+Procedimento 2 – Totalização de valores através do botão “Totalizar”
+Existem 2 (dois) tipos de método para totalizar colunas:
+Automático – Maioria das vezes
+// Para totalizar um campo
+TotalizarDados(Dataset,'Tot');
+// Para totalizar um campo (mudando o termo “Total” padrão para “Valor Total”)
+TotalizarDados(Dataset,'Tot;Valor Total');
+// Para totalizar mais de um campo
+TotalizarDados(TPag,'Val;Valores;Jur;Juros;Dsc;Descontos');
+// Para totalizar mais de um campo com agrupamento por um outro campo
+TotalizarDados(TPag,'Val;Valores;Jur;Juros;Dsc;Descontos','Sta');
+
+PADRONIZAÇÃO DOS NOMES DOS FORMULÁRIOS (TELAS)
+Deverão começar com a letra F seguido de 3 letras com o significado do módulo em questão além de uma numeração sequencial com até 2 dígitos. 
+Exemplo: FCLI01, FCLI02, FEST01, FMOV01, etc.
+
+PADRONIZAÇÃO DOS NOMES DAS TABELAS
+Todas as tabelas do sistema deverão iniciar com a letra H seguida de um complemento de 3 letras que representam o que estará contido nesta tabela. 
+Exemplo: HCLI tabela de clientes, HFOR tabela de fornecedores, HPRO tabela de produtos e assim por diante. 
+Excepcionalmente as tabelas poderão conter mais do que 4 letras mas isto deverá ser evitado. Por sua vez, dentro do Delphi teremos os componentes equivalentes para acesso à estas tabelas. Sendo assim, TCLI para acessar a tabela HCLI, TFOR par acessar a tabela HFOR e assim por diante. Ver anexo I para as padronizações.
+
+Os nomes de campos deverão ter por padrão 3 letras que indicarão o que está contido no campo em questão. 
+Exemplo: RAZ (razão social), END (endereço), NOM (nome), NUM (número), COD (código) e assim por diante. Como no caso das tabelas, apenas em casos excepcionais esta regra poderá mudar (como no caso de um campo para armazenar RG). O objetivo de se utilizar poucas letras na descrição dos campos é tornar o código prático e limpo. Ver anexo II com os padrões
+
+
+Todos os nomes de variáveis que representam valores numéricos (inteiro, float) devem ser precedidos da letra ‘n’ minúscula seguido do nome da variável iniciando com uma letra maiúscula. Para representar datas deve-se preceder o nome com ‘d’. Para representar strings ou memo deve-se preceder o nome com ‘c’. 
+Exemplo: nVal (campo com algum valor numérico), dEmi (campo contendo uma data de emissão, cNom (string contendo um nome).
+As demais variáveis utilizadas para guardar objetos (como TStringList) não seguem um padrão, ficando a critério do programador a regra para utilizá-las.
+Utilizar o mesmo conceito dos campos adicionando o prefixo (d, n, c ou x):
+d = Para variáveis do tipo data
+n = Para variáveis numéricas (inteiro ou float)
+c = Para variáveis do tipo string (ou memo)
+b = Para variáveis do boolean (True ou False)
+x = Para objetos de forma geral
+Exemplos:
+dEmi = Data de emissão
+nTot = Valor total
+
+
+
+
+
