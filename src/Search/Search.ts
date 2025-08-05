@@ -1,18 +1,14 @@
 import 'dotenv/config';
 import { loadDocuments} from '../loader/loader'
-import fs from 'fs/promises'
-import { faissPath } from '../database/config';
 
 export async function searchChunks(query : string) {
-    const shouldRecreate = process.argv.includes('--recreate');
 
-    if (shouldRecreate) {
-        console.log('Tag --recursive encontrada, recriando banco de dados')
-        fs.rm(faissPath,  {recursive: true, force: true})
-    }
     
-    const SearchStore = await loadDocuments();
-    console.log("Success create")
-    const results =  await SearchStore.similaritySearchWithScore(query, 6);
-    return results;
+    console.log("Modelo de re-ranking carregado")
+
+    const vectorStore = await loadDocuments();
+    //Find the first 20 similar chunks
+    const resultsnoFiltered =  await vectorStore.similaritySearchWithScore(query, 20);
+    return resultsnoFiltered;
+    
 }

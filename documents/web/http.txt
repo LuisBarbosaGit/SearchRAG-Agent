@@ -71,12 +71,9 @@ Se False, a requisição falhou. O código de erro (H.HttpResultCode) e a mensag
 
 Se True, a requisição foi bem-sucedida.
 
-Exemplo de Código Canônico
 O procedimento enviaHttpPedido implementa o algoritmo descrito.
-
 Snippet de código
-
-// Faz a requisição Post no /documents
+//Exemplo de código de como fazer uma requisição do tipo http
 procedure enviaHttpPedido(oJson : String);
 var
   H : THProHttp;
@@ -87,15 +84,12 @@ begin
     // 2. Configuração das propriedades da requisição
     H.TimeOut := 120;
     H.Utf8 := True;
-
     // 3. Definição da URL do endpoint
     H.WebService := 'https://sandbox.api2.aprovador.com/v1/documents';
-
     // 4. Adição dos cabeçalhos HTTP necessários
     H.RequestHeaders.Add('Authorization: a6211b49-53f2-44aa-b52d-b836f1084580');
     H.RequestHeaders.Add('x-api-key: a6211b49-53f2-44aa-b52d-b836f1084580');
     H.RequestHeaders.Add('Content-Type: application/json');
-
     // 5. Envio da requisição e tratamento da resposta
     if not H.Post(oJson) then
     begin
@@ -108,7 +102,6 @@ begin
       // Ação em caso de sucesso
       Atencao('Enviado ao Aprovador');
     end;
-
   finally
     // 6. Liberação de recursos, garantida pelo bloco finally
     FreeAndNil(H);

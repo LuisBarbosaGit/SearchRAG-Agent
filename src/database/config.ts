@@ -5,7 +5,13 @@ import fs from "fs/promises";
 import path from "path";
 export const faissPath = path.resolve(process.cwd(), "faiss_index")
 
+//Modelo alternativo
 //intfloat/e5-large-v2
+
+//Para rodar localmente
+// export const embeddings = new HuggingFaceTransformersEmbeddings({
+//   modelName: "Xenova/all-MiniLM-L6-v2",
+// });
 
 export const ebbeddings = new HuggingFaceInferenceEmbeddings({
     model: "sentence-transformers/all-MiniLM-L6-v2",

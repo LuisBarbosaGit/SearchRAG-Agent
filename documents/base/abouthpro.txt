@@ -1,9 +1,24 @@
-A HPro é uma empresa especializada em soluções de tecnologia da informação, que atua há mais de 25 anos atendendo aos mais diversos segmentos do mercado.
+Sobre a HPro: Soluções em Tecnologia da Informação
 
-Criada com o objetivo de proporcionar uma experiência completa e inovadora no mundo da informação, procura entender, detalhadamente, as necessidades do cliente e oferecer o melhor custo-benefício e a melhor solução personalizada em Tecnologia da Informação.
+O que é a HPro?
+A HPro é uma empresa de tecnologia da informação com mais de 25 anos de experiência, atendendo a diversos segmentos de mercado.
 
-Especialista no desenvolvimento de soluções ERP, service desk, consultoria de TI, locação de computadores, nuvem e loja de informática, tem o comprometimento de atender os clientes em todas as suas exigências, sendo este um dos grandes diferenciais da empresa, que não mede esforços para viabilizar as soluções de TI precisas, com sistemas desenvolvidos no máximo de sua funcionalidade, minimizando o uso de softwares externos, serviços técnicos para a implantação de novos projetos e para a solução de problemas em equipamentos de informática. 
+Missão e Diferenciais:
+- Objetivo: Proporcionar uma experiência completa e inovadora em TI.
+- Abordagem: Entender detalhadamente as necessidades do cliente para oferecer soluções personalizadas com o melhor custo-benefício.
+- Comprometimento:** Atender a todas as exigências do cliente, viabilizando soluções precisas e minimizando a dependência de softwares externos.
 
-O foco da HPro é ser a base tecnológica dos clientes, de modo que estes terceirizem à empresa toda a parte do TI e se dediquem totalmente ao sucesso de seus negócios.
+Foco Principal:
+O foco da HPro é ser a base tecnológica completa de seus clientes, permitindo que eles terceirizem totalmente suas necessidades de TI e se concentrem em seus próprios negócios.
 
-Para isso, conta ainda com tecnologia de ponta, que permite atender aos clientes com qualidade, confiabilidade e custos adequados.
+Serviços e Especialidades:
+- Desenvolvimento de soluções ERP.
+- Service Desk.
+- Consultoria de TI.
+- Locação de computadores.
+- Soluções em Nuvem (Cloud).
+- Loja de informática.
+- Implantação de projetos e solução de problemas em equipamentos.
+
+Tecnologia:
+A empresa utiliza tecnologia de ponta para garantir qualidade, confiabilidade e custos adequados em seus serviços.
