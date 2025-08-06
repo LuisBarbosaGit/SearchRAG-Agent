@@ -211,7 +211,6 @@ Exemplo Prático de Leitura e Extração
 Vamos usar a string JSON que criamos no exemplo anterior para ler seus dados.
 
 Snippet de código
-
 procedure LerDadosDaFatura(const JsonString: String);
 var
   // Variáveis para armazenar os dados lidos
@@ -228,25 +227,20 @@ begin
   IdFatura := ExtractJSonInteger(JsonString, 'id_fatura'); // Retorna 1025
   Cliente  := ExtractJSon(JsonString, 'cliente');        // Retorna "ACME Corp"
   EstaPaga := ExtractJSonBool(JsonString, 'pago');         // Retorna False
-
   // 2. Extrair o array 'produtos' como uma string separada
   JsonArrayProdutos := ExtractJSon(JsonString, 'produtos');
   // Conteúdo de JsonArrayProdutos: [{"sku":...},{"sku":...}]
-
   // 3. Iterar sobre os elementos do array
   Indice := 1;
   while True do
   begin
     // Extrai o objeto do produto no índice atual
     JsonProdutoAtual := ExtractJSonElement(JsonArrayProdutos, Indice);
-
     // Se não encontrar mais elementos, sai do loop
     if JsonProdutoAtual = '' then Break;
-
     // Agora, extrai os dados de dentro do objeto do produto
     ShowMessage('SKU: ' + ExtractJSon(JsonProdutoAtual, 'sku'));
     ShowMessage('Qtd: ' + ExtractJSon(JsonProdutoAtual, 'quantidade'));
-
     // Incrementa o índice para o próximo elemento
     Inc(Indice);
   end;
@@ -294,66 +288,51 @@ Se o elemento for encontrado, retorna a String JSON do objeto ou valor naquele �
 
 Se o índice (nElement) estiver fora dos limites do array, a função retorna uma string vazia (''). Este comportamento é a condição de parada para loops de iteração.
 
-Algoritmo de Extração e Iteração
+Exemplo de código para extração
 O padrão canônico para processar um array aninhado é o seguinte:
-
 Passo 1: Isolar a String do Array
 Utilize ExtractJSon para obter a string do array a partir do JSON de entrada.
-
 Snippet de código
-
 var
   JsonInput: String;      // Contém o JSON completo: {"key":"value", "array_key":[{...}]}
   JsonArrayString: String; // Receberá a string do array: "[{...}]"
-
 JsonArrayString := ExtractJSon(JsonInput, 'array_key');
 Passo 2: Iterar sobre os Elementos do Array
 Implemente um loop que utilize um contador de índice para chamar ExtractJSonElement repetidamente.
-
 Snippet de código
-
 var
   JsonElemento: String;
   Indice: Integer;
-
 Indice := 1; // A extração começa no índice 1.
 while True do
 begin
   // Tenta extrair o elemento na posição 'Indice'
   JsonElemento := ExtractJSonElement(JsonArrayString, Indice);
-
   // Se o resultado for uma string vazia, todos os elementos foram lidos.
   if JsonElemento = '' then
     Break; // Termina o loop.
-
   // [ Processamento do JsonElemento aqui ]
-
   // Prepara para a próxima iteração.
   Inc(Indice);
 end;
+
 Passo 3: Processar o Elemento Individual
 Dentro do loop, a variável JsonElemento contém o JSON de um único item. Use as funções ExtractJSon, ExtractJSonInteger, etc., novamente nesta string menor para extrair os dados finais.
-
 Snippet de código
-
 // Dentro do loop 'while'...
 var
   ValorChave: String;
   ValorNumerico: Integer;
-
 ValorChave := ExtractJSon(JsonElemento, 'chave_do_item');
 ValorNumerico := ExtractJSonInteger(JsonElemento, 'chave_numerica_do_item');
 Exemplo de Código Canônico
 O procedimento a seguir implementa o algoritmo completo para extração e processamento de um array.
-
 Snippet de código
-
 procedure ExtrairEProcessarArray(const JsonInput: String; const ChaveDoArray: String);
 var
   // Strings para armazenar as partes do JSON
   JsonArrayString: String;
   JsonElementoString: String;
-
   // Variáveis de controle e para dados extraídos
   Indice: Integer;
   ID: Integer;
@@ -361,34 +340,27 @@ var
 begin
   // Etapa 1: Isola a string do array associada à chave especificada.
   JsonArrayString := ExtractJSon(JsonInput, ChaveDoArray);
-
   // Validação: Interrompe a execução se o array não for encontrado.
   if JsonArrayString = '' then
     Exit;
-
   // Etapa 2: Itera sobre a string do array.
   Indice := 1; // O índice de 'ExtractJSonElement' começa em 1.
   while True do
   begin
     // Extrai o JSON do elemento individual na posição 'Indice'.
     JsonElementoString := ExtractJSonElement(JsonArrayString, Indice);
-
-    // Condição de término: Uma string vazia indica o fim do array.
+  // Condição de término: Uma string vazia indica o fim do array.
     if JsonElementoString = '' then
       Break;
-
     // Etapa 3: Extrai os dados de dentro do JSON do elemento.
     ID   := ExtractJSonInteger(JsonElementoString, 'id');
     Nome := ExtractJSon(JsonElementoString, 'nome');
-
     // [ Neste ponto, os dados do elemento (ID, Nome) podem ser utilizados ]
     // Exemplo: Log.Add(Format('Elemento %d: ID=%d, Nome=%s', [Indice, ID, Nome]));
-
-    // Avança para o próximo elemento.
+   // Avança para o próximo elemento.
     Inc(Indice);
   end;
 end;
-
 // --- Uso do Procedimento ---
 var
   MeuJson: String = '{"relatorio_id":998, "dados":[{"id":10, "nome":"Item A"}, {"id":25, "nome":"Item B"}]}';

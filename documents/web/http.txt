@@ -1,104 +1,55 @@
- A documentação a seguir é baseada estritamente no seu código enviaHttpPedido, detalhando o processo para ser usado como base de conhecimento para um modelo RAG.
+GUIA DE USO DO COMPONENTE THPROHTTP
 
-Documentação Técnica: Enviando Requisições POST com THProHttp
-Este documento descreve o processo técnico para enviar uma requisição HTTP POST com um payload JSON e cabeçalhos customizados, utilizando a classe THProHttp conforme demonstrado no procedimento enviaHttpPedido.
+DEFINIÇÃO E PADRÃO DE USO
+A classe THProHttp é o componente central para realizar a comunicação HTTP (requisições a webservices). O padrão de uso envolve sua instanciação, a configuração de suas propriedades, a execução de um método de ação (como Post ou Get) e, por fim, a garantia de sua liberação da memória.
 
-Componente Principal: A Classe THProHttp
-A classe THProHttp é o objeto central para realizar a comunicação HTTP. O padrão de uso envolve a sua instanciação, configuração de propriedades, execução do método e, por fim, a sua destruição.
+PROPRIEDADES E MÉTODOS ESSENCIAIS
 
-Membros Essenciais Utilizados:
+Propriedades de Configuração
+TimeOut: Integer
+Define o tempo máximo de espera (em segundos) pela resposta do servidor.
 
-Propriedades de Configuração:
+Utf8: Boolean
+Garante que o corpo da requisição e a resposta sejam tratados com a codificação de caracteres UTF-8.
 
-TimeOut: Integer: Define o tempo máximo de espera (em segundos).
+WebService: String
+Define a URL completa de destino (endpoint) da requisição.
 
-Utf8: Boolean: Garante que o payload e a resposta sejam tratados como UTF-8.
+RequestHeaders: TStringList
+Coleção de strings para adicionar os cabeçalhos HTTP da requisição, como Authorization, x-api-key e Content-Type.
 
-WebService: String: Define a URL de destino (endpoint) da requisição.
+Métodos de Ação
+Post(oJson: String): Boolean
+Envia uma requisição do tipo POST. O parâmetro oJson é a string contendo o corpo (payload) da requisição. Retorna True para sucesso e False para falha.
 
-RequestHeaders: TStringList: Coleção para adicionar os cabeçalhos HTTP da requisição.
+Get(): Boolean
+Envia uma requisição do tipo GET. Este método não possui parâmetros, pois os argumentos de uma busca GET devem ser parte da URL na propriedade WebService. Retorna True para sucesso e False para falha.
 
-Método de Ação:
+Propriedades de Resultado
+HttpResultCode: Integer
+Contém o código de status HTTP retornado pelo servidor (ex: 200, 401, 500).
 
-Post(oJson: String): Boolean: Envia a requisição POST. O parâmetro oJson é a string contendo o corpo (payload) da requisição. Retorna True para sucesso (código HTTP 2xx) e False para falha.
+HttpResult: String
+Contém o corpo da resposta do servidor (em caso de sucesso) ou a mensagem de erro (em caso de falha).
 
-Propriedades de Resultado:
+FLUXO DE TRABALHO PARA REQUISIÇÕES
 
-HttpResultCode: Integer: Contém o código de status HTTP da resposta (ex: 200, 401, 500).
+Instanciação e Segurança
+Crie uma instância do THProHttp e encapsule toda a lógica em um bloco try...finally para garantir que o objeto seja liberado da memória com FreeAndNil, evitando vazamentos de recursos.
 
-HttpResult: String: Contém o corpo da resposta do servidor ou a mensagem de erro.
+Configuração
+Defina as propriedades da requisição (TimeOut, Utf8, WebService, RequestHeaders).
 
-Algoritmo de Envio da Requisição POST
-O procedimento enviaHttpPedido segue um fluxo de trabalho estruturado para garantir a correta configuração e execução da requisição.
+Execução
+Chame o método de ação desejado (Post ou Get).
 
-1. Instanciação e Bloco de Segurança:
+Tratamento da Resposta
+Verifique o retorno booleano do método. Se for False, a requisição falhou e os detalhes do erro podem ser obtidos das propriedades HttpResultCode e HttpResult. Se for True, a requisição foi bem-sucedida e o resultado está em HttpResult.
 
-Uma instância da classe THProHttp é criada (H := THProHttp.Create).
+EXEMPLOS DE CÓDIGO EM DELPHI PASCAL
 
-Todo o código é encapsulado em um bloco try...finally para garantir que o objeto H seja sempre liberado da memória com FreeAndNil(H), evitando vazamentos de recursos.
-
-2. Configuração da Requisição:
-
-Propriedades essenciais são definidas no objeto H.
-
-H.TimeOut := 120;
-
-H.Utf8 := True;
-
-3. Definição do Endpoint:
-
-A URL de destino é atribuída à propriedade WebService.
-
-H.WebService := 'https://sandbox.api2.aprovador.com/v1/documents';
-
-4. Configuração dos Cabeçalhos (Headers):
-
-Os cabeçalhos HTTP necessários são adicionados à propriedade RequestHeaders usando o método Add. Cada cabeçalho é uma string no formato 'Chave: Valor'.
-
-H.RequestHeaders.Add('Authorization: ...');
-
-H.RequestHeaders.Add('x-api-key: ...');
-
-H.RequestHeaders.Add('Content-Type: application/json');
-
-5. Execução e Tratamento da Resposta:
-
-O método H.Post(oJson) é chamado, enviando a requisição.
-
-O retorno booleano do método é verificado em uma estrutura if.
-
-Se False, a requisição falhou. O código de erro (H.HttpResultCode) e a mensagem de erro (H.HttpResult) são utilizados para notificar o usuário.
-
-Se True, a requisição foi bem-sucedida.
-
-PROCEDIMENTO PARA REQUISIÇÃO HTTP POST
-
-DEFINIÇÃO
-O procedimento enviaHttpPedido demonstra o algoritmo padrão para enviar dados no formato JSON para um webservice utilizando o componente THProHttp.
-
-PASSOS DO ALGORITMO
-
-Passo 1: Instanciação do Objeto
-Um objeto do tipo THProHttp é criado em memória para manipular a requisição.
-
-Passo 2: Configuração das Propriedades
-As propriedades básicas da requisição são definidas.
-TimeOut: Tempo máximo de espera pela resposta do servidor (em segundos).
-Utf8: Garante que a codificação de caracteres utilizada é UTF-8.
-
-Passo 3: Definição da URL
-A propriedade WebService recebe a URL completa do endpoint para onde a requisição será enviada.
-
-Passo 4: Adição dos Cabeçalhos (Headers)
-Os cabeçalhos HTTP necessários para a autenticação e especificação do tipo de conteúdo são adicionados à requisição. Os mais comuns são Authorization, x-api-key e Content-Type.
-
-Passo 5: Envio da Requisição
-O método H.Post(oJson) é chamado para enviar os dados. Este método envia a requisição e retorna True em caso de sucesso ou False em caso de falha. O conteúdo JSON a ser enviado é passado como parâmetro.
-
-Passo 6: Liberação de Recursos
-Ao final do processo, independentemente de sucesso ou falha, o objeto THProHttp é liberado da memória para evitar vazamentos de recursos (memory leaks).
-
-EXEMPLO DE CÓDIGO EM DELPHI PASCAL
+EXEMPLO 1: ENVIANDO DADOS (MÉTODO POST)
+O procedimento enviaHttpPedido demonstra o algoritmo para enviar dados JSON.
 procedure enviaHttpPedido(oJson : String);
 var
 H : THProHttp;
@@ -113,20 +64,46 @@ H.RequestHeaders.Add('x-api-key: a6211b49-53f2-44aa-b52d-b836f1084580');
 H.RequestHeaders.Add('Content-Type: application/json');
 if not H.Post(oJson) then
 begin
-  atencao('Não foi possível enviar a solicitação via webservice;;Erro: '
-          + IntToStr(H.HttpResultCode) + ' - ' + H.HttpResult);
+atencao('Não foi possível enviar a solicitação via webservice;;Erro: '
++ IntToStr(H.HttpResultCode) + ' - ' + H.HttpResult);
 end
 else
 begin
-  Atencao('Enviado ao Aprovador');
+Atencao('Enviado ao Aprovador');
 end;
 finally
 FreeAndNil(H);
 end;
 end;
 
-TRATAMENTO DE RESPOSTA
-Caso de Falha
-Se o método H.Post retornar False, uma mensagem de atenção é exibida ao usuário, contendo o código de erro HTTP (H.HttpResultCode) e a mensagem de resultado (H.HttpResult) retornados pelo servidor.
-Caso de Sucesso
-Se o método H.Post retornar True, uma mensagem de sucesso ("Enviado ao Aprovador") é exibida ao usuário.
+EXEMPLO 2: CONSULTANDO DADOS (MÉTODO GET)
+O procedimento consultaHttpExemplo demonstra o algoritmo para obter dados de um endpoint. A lógica é similar, mas usa o método Get e não envia um corpo de requisição.
+
+procedure consultaHttpExemplo(const cID: String);
+var
+H : THProHttp;
+begin
+H := THProHttp.Create;
+try
+H.TimeOut := 60;
+H.Utf8 := True;
+// Note que os parâmetros da busca são parte da URL
+H.WebService := 'https://api.exemplo.com/v1/clientes/' + cID;
+
+H.RequestHeaders.Add('Authorization: a6211b49-53f2-44aa-b52d-b836f1084580');
+H.RequestHeaders.Add('Accept: application/json');
+
+if not H.Get then
+begin
+atencao('Não foi possível consultar o serviço;;Erro: '
++ IntToStr(H.HttpResultCode) + ' - ' + H.HttpResult);
+end
+else
+begin
+// Em caso de sucesso, o H.HttpResult contém o JSON retornado
+Atencao('Dados recebidos: ' + H.HttpResult);
+end;
+finally
+FreeAndNil(H);
+end;
+end;

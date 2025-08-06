@@ -1,44 +1,33 @@
 import 'dotenv/config';
-import { loadDocuments} from '../loader/loader'
-import { ChatOllama } from "@langchain/ollama";
-import { PromptTemplate } from "@langchain/core/prompts";
+import { loadDocuments } from '../loader/loader'
+import { CohereRerank } from "@langchain/cohere";
+import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
 
-export const minillmModel = new ChatOllama({
-    model: "qwen2:1.5b",
-    temperature: 0.2,
+export const llmQueryTransformer = new ChatGoogleGenerativeAI({
+    model: "gemini-2.0-flash",
+    apiKey: process.env.GOOGLE_API_KEY,
+    temperature: 0.3,
 
-});
-
-export async function searchChunks(query : string): Promise<any> {
-    const templatePrepareDocument = `Você é um especialista em processamento e filtragem de informações. Sua tarefa é extrair e reter APENAS os trechos de um CONTEXTO fornecido que são diretamente relevantes para responder à PERGUNTA do usuário.
-    Siga estas regras rigorosamente:
-    1.Leia a question para entender qual informação específica é necessária.
-    2.Leia o contexto e identifique todas as frases ou parágrafos que contêm a informação necessária para responder à question.
-    3.Filtre e descarte qualquer informação, frase ou parágrafo que seja ruído ou que não ajude a responder diretamente à pergunta.
-    4.Retorne APENAS os trechos relevantes que você extraiu.
-    5.Mantenha a linguagem original dos trechos extraídos, sem reescrevê-los.
-    6.Se nenhum trecho do contexto for relevante para a pergunta, retorne o contexto original"
-
-    contexto:
-    {context}
-    question:
-    {question}`;
-
-    const promptPrepare = new PromptTemplate({
-        template: templatePrepareDocument,
-        inputVariables: ["context", "question"]
-    });
-    const chain = promptPrepare.pipe(minillmModel);
+})
+export async function searchChunks(query: string): Promise<any> {
+    //This aux llm will catch the user query and use to generate a more detailed prompt, which will be serach on vector store
+    const preparePrompt = `Com base na pergunta ${query}, gere 3 versões alternativas e mais detalhadas para melhorar a busca em um sistema rag.`;
+    const improvedQuery = await llmQueryTransformer.invoke(preparePrompt);
+    console.log("Usage:", improvedQuery.response_metadata);
+    const finalQuery : string = improvedQuery.content as string;
 
     const vectorStore = await loadDocuments();
-    //Find the first 20 similar chunks
-    const resultsnoFiltered =  await vectorStore.similaritySearchWithScore(query, 15);
+    const resultsnoFiltered = await vectorStore.similaritySearchWithScore(finalQuery, 15);
+    const docs = resultsnoFiltered.map(([doc]) => doc);
 
-    const response = await chain.invoke({
-        context: resultsnoFiltered.map(doc =>  doc[0].pageContent).join("/n"),
-        question: query,
+    const reranker = new CohereRerank({
+        apiKey: process.env.COHERE_API_KEY,
+        model: "rerank-multilingual-v3.0",
+        topN: 4,
     });
+    const rerankedDocs = await reranker.compressDocuments(docs, finalQuery);
+    console.log("Reranked Documents:", rerankedDocs);
 
-    return response.content;
-    
+    return rerankedDocs.map((doc) => doc.pageContent);
+
 }

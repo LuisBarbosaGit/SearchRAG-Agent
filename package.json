@@ -21,6 +21,8 @@
   },
   "dependencies": {
     "@huggingface/inference": "^4.6.1",
+    "@huggingface/transformers": "^3.7.1",
+    "@langchain/cohere": "^0.3.4",
     "@langchain/community": "^0.3.49",
     "@langchain/core": "^0.3.66",
     "@langchain/google-genai": "^0.2.16",
@@ -31,6 +33,8 @@
     "express": "^5.1.0",
     "faiss-node": "^0.5.1",
     "langchain": "^0.3.30",
-    "pdf-parse": "^1.1.1"
+    "onnxruntime-node": "^1.22.0-rev",
+    "pdf-parse": "^1.1.1",
+    "zod": "^3.25.76"
   }
 }
