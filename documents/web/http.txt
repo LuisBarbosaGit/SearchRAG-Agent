@@ -1,4 +1,4 @@
-Entendido. A documentação a seguir é baseada estritamente no seu código enviaHttpPedido, detalhando o processo para ser usado como base de conhecimento para um modelo RAG.
+ A documentação a seguir é baseada estritamente no seu código enviaHttpPedido, detalhando o processo para ser usado como base de conhecimento para um modelo RAG.
 
 Documentação Técnica: Enviando Requisições POST com THProHttp
 Este documento descreve o processo técnico para enviar uma requisição HTTP POST com um payload JSON e cabeçalhos customizados, utilizando a classe THProHttp conforme demonstrado no procedimento enviaHttpPedido.
@@ -71,39 +71,62 @@ Se False, a requisição falhou. O código de erro (H.HttpResultCode) e a mensag
 
 Se True, a requisição foi bem-sucedida.
 
-O procedimento enviaHttpPedido implementa o algoritmo descrito.
-Snippet de código
-//Exemplo de código de como fazer uma requisição do tipo http
+PROCEDIMENTO PARA REQUISIÇÃO HTTP POST
+
+DEFINIÇÃO
+O procedimento enviaHttpPedido demonstra o algoritmo padrão para enviar dados no formato JSON para um webservice utilizando o componente THProHttp.
+
+PASSOS DO ALGORITMO
+
+Passo 1: Instanciação do Objeto
+Um objeto do tipo THProHttp é criado em memória para manipular a requisição.
+
+Passo 2: Configuração das Propriedades
+As propriedades básicas da requisição são definidas.
+TimeOut: Tempo máximo de espera pela resposta do servidor (em segundos).
+Utf8: Garante que a codificação de caracteres utilizada é UTF-8.
+
+Passo 3: Definição da URL
+A propriedade WebService recebe a URL completa do endpoint para onde a requisição será enviada.
+
+Passo 4: Adição dos Cabeçalhos (Headers)
+Os cabeçalhos HTTP necessários para a autenticação e especificação do tipo de conteúdo são adicionados à requisição. Os mais comuns são Authorization, x-api-key e Content-Type.
+
+Passo 5: Envio da Requisição
+O método H.Post(oJson) é chamado para enviar os dados. Este método envia a requisição e retorna True em caso de sucesso ou False em caso de falha. O conteúdo JSON a ser enviado é passado como parâmetro.
+
+Passo 6: Liberação de Recursos
+Ao final do processo, independentemente de sucesso ou falha, o objeto THProHttp é liberado da memória para evitar vazamentos de recursos (memory leaks).
+
+EXEMPLO DE CÓDIGO EM DELPHI PASCAL
 procedure enviaHttpPedido(oJson : String);
 var
-  H : THProHttp;
+H : THProHttp;
 begin
-  // 1. Instanciação do objeto THProHttp
-  H := THProHttp.Create;
-  try
-    // 2. Configuração das propriedades da requisição
-    H.TimeOut := 120;
-    H.Utf8 := True;
-    // 3. Definição da URL do endpoint
-    H.WebService := 'https://sandbox.api2.aprovador.com/v1/documents';
-    // 4. Adição dos cabeçalhos HTTP necessários
-    H.RequestHeaders.Add('Authorization: a6211b49-53f2-44aa-b52d-b836f1084580');
-    H.RequestHeaders.Add('x-api-key: a6211b49-53f2-44aa-b52d-b836f1084580');
-    H.RequestHeaders.Add('Content-Type: application/json');
-    // 5. Envio da requisição e tratamento da resposta
-    if not H.Post(oJson) then
-    begin
-      // Tratamento em caso de falha
-      atencao('Não foi possível enviar a solicitação via webservice;;Erro: '
-              + IntToStr(H.HttpResultCode) + ' - ' + H.HttpResult);
-    end
-    else
-    begin
-      // Ação em caso de sucesso
-      Atencao('Enviado ao Aprovador');
-    end;
-  finally
-    // 6. Liberação de recursos, garantida pelo bloco finally
-    FreeAndNil(H);
-  end;
+H := THProHttp.Create;
+try
+H.TimeOut := 120;
+H.Utf8 := True;
+H.WebService := 'https://sandbox.api2.aprovador.com/v1/documents';
+H.RequestHeaders.Add('Authorization: a6211b49-53f2-44aa-b52d-b836f1084580');
+H.RequestHeaders.Add('x-api-key: a6211b49-53f2-44aa-b52d-b836f1084580');
+H.RequestHeaders.Add('Content-Type: application/json');
+if not H.Post(oJson) then
+begin
+  atencao('Não foi possível enviar a solicitação via webservice;;Erro: '
+          + IntToStr(H.HttpResultCode) + ' - ' + H.HttpResult);
+end
+else
+begin
+  Atencao('Enviado ao Aprovador');
 end;
+finally
+FreeAndNil(H);
+end;
+end;
+
+TRATAMENTO DE RESPOSTA
+Caso de Falha
+Se o método H.Post retornar False, uma mensagem de atenção é exibida ao usuário, contendo o código de erro HTTP (H.HttpResultCode) e a mensagem de resultado (H.HttpResult) retornados pelo servidor.
+Caso de Sucesso
+Se o método H.Post retornar True, uma mensagem de sucesso ("Enviado ao Aprovador") é exibida ao usuário.
