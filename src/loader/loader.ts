@@ -11,17 +11,18 @@ const loader = new DirectoryLoader(
         '.pdf': (filePath) => new PDFLoader(filePath),
         '.txt': (filePath) => new TextLoader(filePath)
     }
-)
-//Chunk Options
+);
+
 export async function loadDocuments() {
-    const docs = await loader.load()
+    const docs = await loader.load();
     const splitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 1000,
-        chunkOverlap: 150,
+        chunkSize: 1200,
+        chunkOverlap: 100,
         separators: ["\n\n", "\n", " ", ""],  
     })
-    //Chunk Documents
+    
     const chunks = await splitter.splitDocuments(docs);
+    
     //Create or receive vectorStore
     const vectorStore = await getVectorStore(chunks);
 

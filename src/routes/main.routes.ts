@@ -1,5 +1,5 @@
 import express from "express"
-import { MainControler } from "../controlers/query,controler"
+import { MainControler } from "../controlers/query.controler"
 
 export const MainRoutes = express.Router()
 

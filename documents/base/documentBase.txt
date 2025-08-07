@@ -248,117 +248,81 @@ Em cenários onde ocorrem muitas exclusões de registros e poucas inclusões, o 
 Como consequência, o tamanho físico do arquivo da tabela (extensão DAT) no disco não diminui, mesmo que a tabela contenha poucos registros ativos.
 
 SOLUÇÃO PARA REDUÇÃO FÍSICA DO ARQUIVO (OTIMIZAÇÃO)
-
 Para liberar o espaço em disco ocupado por registros excluídos e reduzir o tamanho físico do arquivo, existe um método específico.
-
 Método: Tabela.OptimizeTable
-
 Este método reescreve o arquivo da tabela, eliminando permanentemente os registros marcados como excluídos e compactando o arquivo.
-
 Aviso de Uso:
 O método Tabela.OptimizeTable é uma operação de manutenção pesada e raramente utilizada. Seu uso deve ser reservado para casos extremos, onde a redução do tamanho do arquivo em disco é estritamente necessária.
 	
 REGRAS DE USO DE ÍNDICES NO DBISAM
-
 IMPORTÂNCIA DOS ÍNDICES
 A performance do banco de dados DBISAM depende diretamente da existência de índices apropriados para as consultas. Processamentos sem os índices corretos resultarão em lentidão.
-
 CRIAÇÃO DE ÍNDICES COMPOSTOS (MÚLTIPLOS CAMPOS)
 Para criar um índice que abrange mais de um campo, utilize o caractere ponto e vírgula (;) como separador.
-
 Exemplo de Sintaxe:
 CLI;DAT
-
 Neste exemplo, um único índice é criado para os campos CLI e DAT, com CLI sendo o primeiro campo e DAT o segundo.
 
 REGRA CRÍTICA DE OTIMIZAÇÃO PARA CONSULTAS SQL
 O otimizador de consultas SQL do DBISAM utiliza APENAS o primeiro campo de qualquer índice para acelerar uma pesquisa. Campos subsequentes em um índice composto não são considerados pelo otimizador de SQL.
-
 EXEMPLO PRÁTICO DA REGRA DE OTIMIZAÇÃO
-
 Considerando um índice definido como "CLI;DAT":
-
 Cenário 1: Pesquisa Otimizada
 Uma consulta SQL que utilize um filtro no campo CLI será otimizada pelo índice e executada rapidamente.
-
 Cenário 2: Pesquisa Não Otimizada
 Uma consulta SQL que utilize um filtro apenas no campo DAT NÃO será otimizada por este índice. O banco de dados executará uma varredura completa na tabela (table scan), o que é um processo lento.
 
 DIRETRIZ PRÁTICA DE IMPLEMENTAÇÃO
 A ordem dos campos em um índice é o fator mais importante para a performance. Para cada campo que é frequentemente usado como critério de busca em consultas SQL, deve existir um índice que comece por ele.
-
 Para otimizar buscas tanto por CLI quanto por DAT no exemplo acima, a solução correta seria criar dois índices distintos:
-
 Índice 1: CLI;DAT (Otimiza buscas por CLI)
 Índice 2: DAT;CLI (Otimiza buscas por DAT)
 	
 COMPARAÇÃO DE MÉTODOS DE BUSCA: FINDKEY VS LOCATE
-
 Ambos os métodos, FindKey e Locate, são utilizados para localizar registros. No entanto, eles operam de maneiras fundamentalmente diferentes, com implicações diretas na performance e no uso.
-
 MÉTODO: FINDKEY
-
 Uso Principal:
 Localização de registros de alta performance.
-
 Onde Funciona:
 Funciona SOMENTE em tabelas (TTable). Não funciona em queries.
-
 Como Funciona (Mecanismo de Busca):
 Utiliza obrigatoriamente o índice que está ativo na tabela no momento da busca. A pesquisa é sempre otimizada e extremamente rápida.
-
 Requisito:
 A tabela deve estar com o índice correto selecionado antes da chamada do método.
 
 MÉTODO: LOCATE
-
 Uso Principal:
 Localização de registros de forma flexível.
-
 Onde Funciona:
 Funciona tanto em tabelas (TTable) quanto em queries (TQuery).
-
 Como Funciona (Mecanismo de Busca):
 Possui um comportamento duplo:
-
 Otimizado: Se existir um índice compatível com os campos da busca, o Locate o utilizará para uma pesquisa rápida.
-
 Não Otimizado: Se NÃO existir um índice compatível, o Locate fará uma busca sequencial, percorrendo a tabela registro a registro do início ao fim. Este processo é muito lento em tabelas grandes.
 
 DIRETRIZ DE USO E PERFORMANCE
-
 Use FindKey sempre que a performance for crítica e você estiver trabalhando diretamente em uma tabela com um índice já definido. É o método mais rápido e eficiente.
-
 Use Locate quando precisar de mais flexibilidade, como em queries, ou quando a busca for em campos não indexados. Esteja ciente do risco de lentidão se não houver um índice de apoio para a sua busca.
 	
 USO DE FAIXAS DE DADOS (RANGE)
-
 DEFINIÇÃO
 O método de RANGE é utilizado para filtrar e extrair um subconjunto específico de registros de uma tabela, criando uma "visão" temporária contendo apenas os dados daquela faixa.
-
 REQUISITO FUNDAMENTAL
 Para definir uma faixa, a tabela deve obrigatoriamente estar com um índice ativo que corresponda ao campo ou campos que serão utilizados para definir o início e o fim da faixa.
-
 COMANDOS PRINCIPAIS
-
 SETRANGE
 Este é o método utilizado para definir e ativar a faixa de dados.
-
 CANCELRANGE
 Este método é utilizado para desativar a faixa e fazer com que a tabela volte a exibir todos os registros.
 
 REGRAS CRÍTICAS DE COMPORTAMENTO
-
 Travamento do Índice
 Após a ativação de um RANGE com SETRANGE, o índice da tabela não pode ser alterado. Se o índice for modificado, o RANGE é automaticamente cancelado.
-
 Escopo de Operação
 Enquanto um RANGE estiver ativo, todos os métodos de navegação e busca na tabela funcionarão exclusivamente dentro da faixa de dados definida. Métodos como First, Last, Next, Prior, Eof, Bof, FindKey e Locate irão operar apenas sobre o subconjunto de registros extraído, ignorando todos os outros registros da tabela.
 
 EXEMPLO PRÁTICO DE USO
-
 O código abaixo demonstra um cenário comum: percorrer uma tabela de pedidos (TPev) e, para cada pedido, criar uma faixa na tabela de itens (TIve) para processar apenas os itens daquele pedido específico.
-
 Código em Delphi Pascal para implementação de setRange:
 TPev.First;
 while not TPev.Eof do begin
@@ -380,27 +344,20 @@ while not TIve.Eof do begin
 end;
 TPev.Next;
 end;
-
 Análise do Exemplo:
 O loop externo percorre a tabela de pedidos (TPev).
 A cada iteração, TIve.SetRange é chamado para filtrar a tabela de itens (TIve), mostrando apenas os itens que correspondem à empresa (Emp) and número do pedido (Num) do registro atual em TPev.
 O loop interno então processa apenas os itens pertencentes àquele pedido específico, otimizando a lógica e evitando a necessidade de varrer a tabela de itens inteira repetidamente.
 
 NAVEGAÇÃO DE REGISTROS EM TABELAS E QUERIES
-
 Para navegar entre os registros de uma tabela ou query, ou seja, para mudar o registro ativo (ponteiro), os seguintes métodos devem ser utilizados. A navegação sempre respeita a ordem definida pelo índice ativo no momento.
-
 MÉTODOS DE MOVIMENTAÇÃO DO PONTEIRO
-
 First
 Posiciona o ponteiro no primeiro registro, de acordo com a ordem do índice ativo.
-
 Next
 Move o ponteiro para o próximo registro, seguindo a ordem do índice ativo.
-
 Prior
 Move o ponteiro para o registro anterior, seguindo a ordem do índice ativo.
-
 Last
 Posiciona o ponteiro no último registro, de acordo com a ordem do índice ativo.
 
@@ -410,46 +367,34 @@ EOF (End Of File)
 A flag EOF é ativada (se torna True) quando o ponteiro está no último registro e o método Next é chamado. O ponteiro passa a apontar para "depois" do último registro.
 BOF (Beginning Of File)
 A flag BOF é ativada (se torna True) quando o ponteiro está no primeiro registro e o método Prior é chamado. O ponteiro passa a apontar para "antes" do primeiro registro.
-
 Padrão de Uso em Loops:
 O padrão mais comum para percorrer todos os registros é utilizar while not Eof, que garante que o loop continue enquanto o ponteiro estiver posicionado em um registro válido.
 
 DIRETRIZ DE USO: TABELAS VS QUERIES
-
 Uma decisão comum no desenvolvimento é escolher entre o acesso direto a tabelas (TTable) e o uso de queries (TQuery). Cada componente tem um propósito específico.
-
 COMPONENTE: TABELAS (TTABLE)
-
 Uso Principal:
 Manutenção de dados, como inclusão, alteração e exclusão de registros (operações de CRUD - Create, Read, Update, Delete).
-
 Características:
 O acesso utilizando tabelas é sempre o método de mais alta performance para manipulação de dados, pois interage diretamente com os arquivos e índices.
 É menos flexível para consultas complexas que envolvem múltiplos filtros e ordenações dinâmicas.
-
 Quando usar:
 Utilize tabelas para telas de cadastro e manutenção onde as operações são focadas em um único registro ou em um conjunto de dados com filtros e ordem simples, definidos por um índice ativo.
 
 COMPONENTE: QUERIES (TQUERY)
-
 Uso Principal:
 Consultas e relatórios de dados, permitindo a aplicação de múltiplos critérios de filtro e ordenações complexas.
-
 Características:
 Oferecem máxima flexibilidade para montar instruções SQL dinâmicas, ajustadas conforme a necessidade do usuário.
 A performance de uma query depende criticamente da existência de índices que otimizem as cláusulas de busca (WHERE). Uma query sem os índices apropriados será extremamente lenta.
-
 Quando usar:
 Utilize queries para telas de busca, grades de visualização de dados, relatórios e qualquer situação que exija filtros, junções (joins) ou ordenações que não correspondem diretamente a um único índice de tabela.
-
 DIRETRIZ GERAL
 Não existe uma regra única para todos os casos. A decisão deve ser planejada. Use Tabelas para performance em manutenção de dados e Queries para flexibilidade em consultas.
 
 EXEMPLO DE USO PRÁTICO DE QUERY
 O código abaixo demonstra como construir dinamicamente uma consulta complexa para uma tela de busca, adicionando condições (filtros) com base na entrada do usuário.
-
 Código em Delphi Pascal:
-
 Passo 1: Construção da Cláusula WHERE dinamicamente
 Q.ClearCond;
 Q.AddCondI('emp','=',ValorInt(EEmp.Text));
@@ -459,16 +404,13 @@ Q.AddCondS('sit','=',ESit.Text);
 if not Empty(ERef.Text) then begin
 Q.AddCondSql('textsearch('+QuotedStr(ERef.Text)+' in ref)');
 end;
-
 Passo 2: Montagem da Instrução SQL Completa
 Q.Sql.Clear;
 Q.Sql.Add('select * from hose');
 Q.Sql.Add('where '+Q.GetWhere);
 Q.Sql.Add('order by emp, num');
-
 Passo 3: Associação com a Tabela Principal (se necessário)
 Q.MainTable := D.TOse;
-
 Passo 4: Definição das Colunas de Exibição
 Q.Clear;
 Q.Add('Num;Número');
@@ -482,7 +424,6 @@ Q.Add('Mat;Total materiais');
 Q.Add('Svc;Total serviços');
 Q.Add('Dsc;Descontos');
 Q.Add('Tot;Total geral');
-
 Passo 5: Execução da Query
 ShowWait('Aguarde, preparando as informações...');
 Q.RefreshTables;
@@ -495,68 +436,47 @@ A estrutura abaixo foi pensada para guiar o LLM a sempre preferir a solução ma
 USO DE FILTROS EM TABELAS E QUERIES (DBISAM)
 
 DIRETRIZ PRINCIPAL: EVITAR O USO DE FILTROS
-
 A recomendação padrão é evitar o uso de filtros para restringir dados.
-
 Na grande maioria dos cenários, os mesmos resultados podem ser obtidos de forma muito mais eficiente utilizando uma das seguintes abordagens:
-
 Tabelas (TTable) com índices apropriados (usando SetRange ou FindKey).
-
 Queries (TQuery) com cláusulas WHERE bem definidas em código SQL.
 
 JUSTIFICATIVA DA RECOMENDAÇÃO
-
 Filtros no DBISAM operam do lado do cliente, o que significa que todos os dados são primeiro trazidos do banco de dados para a memória da aplicação, e só então o filtro é aplicado. Este processo é ineficiente e consome muitos recursos, resultando em lentidão, especialmente em tabelas com muitos registros.
-
 Em contraste, Índices e cláusulas WHERE operam do lado do servidor (banco de dados), trazendo para a aplicação apenas os registros que já correspondem ao critério, o que é muito mais rápido.
 
 USO EM CASOS DE EXCEÇÃO
-
 Embora deva ser evitado, o recurso de filtro está disponível para situações onde as alternativas não são viáveis.
-
 Existem duas formas de implementar um filtro:
-
 Propriedade Filter (Para Filtros Simples)
 Esta propriedade permite definir uma condição de filtro simples através de uma string.
-
 Implementação:
 a. Atribua a condição à propriedade Filter.
 b. Ative o filtro com a propriedade Filtered := True.
 c. Reposicione o ponteiro para o início do conjunto de dados filtrado.
-
 Exemplo de Código em Delphi Pascal:
 TOse.Filter := 'sta = ' + IntToStr(ValorInt(ESta.Text));
 TOse.Filtered := True;
 TOse.First;
-
 Evento OnFilterRecord (Para Filtros Complexos)
 Este evento oferece controle total para criar lógicas de filtro complexas, que não seriam possíveis com a propriedade Filter. O código para avaliar se um registro deve ou não ser exibido é escrito diretamente dentro deste evento.
 
 OTIMIZAÇÃO DE CONSULTAS: CAMPOS CALCULADOS VS. SQL JOIN
 
 DIRETRIZ DE PERFORMANCE
-
 Por questões de desempenho, a abordagem preferencial é evitar o uso de consultas SQL com múltiplas tabelas (JOINs). Em vez disso, deve-se utilizar o recurso de campos calculados (virtuais) em uma query que consulta uma única tabela principal.
-
 A utilização de campos calculados resulta em uma performance de carregamento de dados significativamente superior.
-
 ABORDAGEM 1: USO DE CAMPOS CALCULADOS (VIRTUAIS) - RECOMENDADO
-
 Esta técnica consiste em adicionar campos a uma query que não existem fisicamente na tabela principal. O valor desses campos é calculado e preenchido em tempo de execução, geralmente buscando informações relacionadas em outras tabelas.
-
 Quando Usar:
 É a abordagem ideal para exibir informações de tabelas relacionadas (como o nome de um cliente em uma tabela de pedidos) sem a necessidade de um JOIN no SQL.
-
 Implementação:
 O processo ocorre em dois passos:
-
 Definição do Campo: O campo calculado é definido na estrutura da query, geralmente com o método AddCalc.
-
 Cálculo do Valor: A lógica para calcular o valor do campo é escrita no evento OnCalcFields do componente da query.
 
 Exemplo Prático de Implementação:
 O código abaixo demonstra como uma query de pedidos (TPec) utiliza campos calculados para exibir nomes de clientes (CliNom), descrições de índices (MosDes) e nomes de departamentos (DepDes) sem usar JOINs.
-
 Passo A: Definição do Campo Calculado
 TPec.AddCalc('DepDes','Departamento',ftString,40);
 Passo B: Lógica de Cálculo no Evento OnCalcFields
@@ -584,132 +504,90 @@ end;
 end;
 
 ABORDAGEM 2: USO DE JOIN EM SQL (SITUAÇÃO DE EXCEÇÃO)
-
 Quando Usar:
 O uso de um SQL com JOIN (mais de uma tabela) torna-se necessário principalmente em uma situação específica: quando existe a necessidade de ordenar o resultado da consulta por um campo que pertence a uma tabela secundária.
 Como o evento OnCalcFields ocorre após a ordenação dos dados, ele não pode ser usado para esse fim, tornando o JOIN a única alternativa viável.
-
 Ok, vamos refinar este trecho sobre o Modelo Entidade-Relacionamento. A estrutura a seguir foi projetada para que o RAG possa facilmente extrair a definição de cada componente ou regra de cardinalidade de forma isolada.
 
 MODELO ENTIDADE-RELACIONAMENTO (MER)
-
 DEFINIÇÃO
 O Modelo Entidade-Relacionamento, conhecido como MER, é um modelo de dados abstrato e conceitual. Sua finalidade é descrever os dados de um domínio ou de um sistema de informação.
-
 DIAGRAMA ENTIDADE-RELACIONAMENTO (DER)
 A principal ferramenta do MER é sua representação gráfica, o Diagrama Entidade-Relacionamento (DER). Ele visualiza a estrutura dos dados e suas interações.
 
 COMPONENTES DO DIAGRAMA (NOTACAO ORIGINAL)
-
 Entidades
 Representadas por retângulos, são os objetos ou conceitos sobre os quais se deseja armazenar informações (ex: Clientes, Pedidos, Produtos).
-
 Atributos
 Representados por círculos, são as propriedades ou características de uma entidade (ex: para a entidade Cliente, os atributos seriam Nome, Endereço, Telefone).
-
 Relacionamentos
 Representados por losangos, descrevem como as entidades se associam ou interagem entre si (ex: um Cliente "faz" um Pedido).
 
 TIPOS DE RELACIONAMENTO (CARDINALIDADE)
-
 A cardinalidade define a quantidade de instâncias de uma entidade que podem se relacionar com instâncias de outra entidade.
-
 Relação 1..1 (Um para Um)
 Indica que um registro em uma tabela se relaciona com, no máximo, um registro em outra tabela, e vice-versa. A relação é unívoca.
 Regra de Chave Estrangeira: A chave estrangeira pode ser colocada em qualquer uma das duas tabelas.
-
 Relação 1..n (Um para Muitos)
 Este é o tipo de relacionamento mais comum. Um registro em uma tabela pode se relacionar com muitos registros em outra, mas um registro da segunda tabela só pode se relacionar com um da primeira.
 Regra de Chave Estrangeira: A chave primária da tabela do lado "1" é adicionada como chave estrangeira na tabela do lado "n".
-
 Relação n..n (Muitos para Muitos)
 Indica que muitos registros em uma tabela podem se relacionar com muitos registros em outra.
 Regra de Implementação: Este relacionamento não pode ser implementado diretamente. É necessário criar uma terceira tabela, chamada de tabela associativa ou de ligação.
 Esta nova tabela conterá as chaves primárias de ambas as tabelas originais, formando uma chave primária composta. O relacionamento "n..n" é então decomposto em dois relacionamentos "1..n", com o lado "n" de ambos apontando para a nova tabela associativa.
 
 FERRAMENTA DE GERAÇÃO DE PROJETOS: GENAPLIC
-
 OBJETIVO PRINCIPAL
 A ferramenta GenAplic tem como finalidade principal automatizar a criação da estrutura inicial de um novo projeto de software, servindo como o ponto de partida para o desenvolvimento.
-
 FUNCIONALIDADES EXECUTADAS
 Ao ser utilizado, o GenAplic realiza as seguintes ações de configuração e criação:
-
 Definição do Nome do Projeto
 Especifica o nome do arquivo de projeto principal (extensão DPR).
-
 Definição de Títulos
 Configura o nome do sistema e o título da aplicação que será exibido.
-
 Criação da Estrutura de Pastas
 Cria o diretório raiz onde todos os arquivos relacionados ao projeto serão armazenados. Esta ação só é executada se a pasta ainda não existir.
-
 RESULTADO FINAL
 Após a execução do GenAplic, o desenvolvedor terá um esqueleto de projeto pronto, com a estrutura de pastas e os nomes de arquivos e títulos já definidos, permitindo que o desenvolvimento das funcionalidades comece imediatamente.
 
 FERRAMENTA DE GESTÃO DE BANCO DE DADOS: GENFILES
-
 OBJETIVO PRINCIPAL
 A ferramenta GenFiles possui um duplo objetivo: atuar como um gerador de documentação da estrutura do banco de dados e como um gerador de código completo para a manutenção dessa estrutura.
-
 FUNCIONALIDADES DE DOCUMENTAÇÃO
 O GenFiles analisa o projeto e gera uma documentação técnica detalhada, especificando os seguintes itens do banco de dados:
-
 Tabelas
-
 Campos de cada tabela
-
 Índices existentes
-
 Regras de Integridade Referencial
-
 FUNCIONALIDADES DE GERAÇÃO DE CÓDIGO
 A ferramenta gera automaticamente todo o código necessário para realizar a manutenção e evolução da estrutura do banco de dados. As rotinas geradas abrangem:
-
 Criação de novas tabelas.
-
 Criação e/ou alteração de campos em tabelas existentes.
-
 Criação e/ou alteração de índices.
-
 Reorganização de arquivos de dados.
-
 Definição de máscaras de entrada para campos.
-
 Definição de campos obrigatórios.
-
 Outros recursos relacionados à estrutura dos dados.
-
 RESULTADO FINAL
 O uso do GenFiles automatiza tarefas complexas e repetitivas de administração do banco de dados, garantindo que a documentação e o código de manutenção estejam sempre sincronizados com a estrutura real das tabelas.
 
 FERRAMENTA DE GERAÇÃO DE FORMULÁRIOS: GENFORM
-
 OBJETIVO PRINCIPAL
 O GenForm é uma ferramenta de alta produtividade projetada para gerar automaticamente a estrutura e o código-fonte completos para formulários de sistemas.
-
 COMO FUNCIONA
 Com base em informações e definições previamente inseridas (provavelmente a partir da estrutura de uma tabela do GenFiles), o GenForm cria todo o código boilerplate necessário para a tela. Isso inclui a interface visual e as conexões de dados.
-
 PRINCIPAL BENEFÍCIO
 A utilização do GenForm acelera significativamente o desenvolvimento de um projeto. Ao automatizar a criação de formulários, a ferramenta permite que o foco do desenvolvedor seja direcionado exclusivamente para a implementação das regras de negócio e da lógica específica do problema, em vez de gastar tempo com tarefas repetitivas de construção de interface.
 
 UTILITÁRIO DE GERENCIAMENTO: DBM (DATABASE MANAGER)
-
 DEFINIÇÃO E OBJETIVO
 O DBM é o utilitário oficial para gerenciamento do banco de dados DBISAM. Seu objetivo é fornecer uma interface direta para que o desenvolvedor possa administrar e interagir com toda a estrutura e os dados do banco.
-
 FUNCIONALIDADES DE ADMINISTRAÇÃO DA ESTRUTURA (SCHEMA)
 O DBM permite realizar modificações diretas na estrutura das tabelas e arquivos do banco de dados. As principais funções administrativas são:
-
 Criação de novas tabelas.
-
 Alteração da estrutura de tabelas existentes.
-
 Criação ou atualização de índices.
-
 Reparação de tabelas que apresentam problemas de integridade.
-
 FUNCIONALIDADES DE MANIPULAÇÃO E ANÁLISE DE DADOS
 A ferramenta também oferece um conjunto de recursos práticos para o desenvolvedor interagir com os dados durante o desenvolvimento e a depuração. As principais funções de análise são:
 Localizar registros específicos (semelhante ao Locate/FindKey).
@@ -719,30 +597,22 @@ Filtrar os dados de uma tabela para visualizar subconjuntos.
 Gerar e executar códigos SQL diretamente no banco de dados.
 Muitos outros recursos para inspeção e manipulação de dados.
 
-eDBM – Database Manager
-É o equivalente ao DBM mas para o banco de dados ELEVATEDB.
+
 
 SERVIÇO DE PROCESSAMENTO: RPSERVER
-
 DEFINIÇÃO E INSTALAÇÃO
 O RPServer é um serviço que é instalado juntamente com o aplicativo servidor do banco de dados. Sua função é permitir a execução de rotinas e processos diretamente no servidor.
-
 CASO DE USO 1: PROCESSAMENTO DO LADO DO SERVIDOR (SERVER-SIDE)
-
 Objetivo:
 Otimizar a performance de operações que manipulam grandes volumes de dados.
-
 Como Funciona:
 Ao utilizar o RPServer, as funções são executadas diretamente na base de dados, no próprio servidor. Isso evita o tráfego de grandes quantidades de dados pela rede até a estação cliente para serem processados.
-
 Benefício:
 A redução drástica do tráfego de rede resulta em um aumento significativo de velocidade e eficiência, principalmente em redes com menor largura de banda.
 
 CASO DE USO 2: EXECUÇÃO DE TAREFAS AGENDADAS
-
 Objetivo:
 Automatizar rotinas e processos que devem ser executados sem intervenção do usuário.
-
 Como Funciona:
 O RPServer pode ser configurado para executar tarefas em horários predeterminados.
 Exemplos de Tarefas:
@@ -752,13 +622,10 @@ Geração de relatórios agendados.
 Sincronização de dados.
 
 FERRAMENTA DE EDIÇÃO DE TEXTO: HPROEDIT
-
 DEFINIÇÃO
 O HProEdit é um editor de textos avançado, desenvolvido como uma alternativa mais poderosa ao Bloco de Notas padrão.
-
 CARACTERÍSTICA PRINCIPAL
 Sua arquitetura é multi-janelas, permitindo ao usuário abrir e trabalhar com múltiplos arquivos simultaneamente na mesma instância do programa.
-
 PRINCIPAIS USOS
 A ferramenta é projetada para agilizar o trabalho de desenvolvedores e analistas, oferecendo recursos para a análise eficiente de diversos tipos de arquivos de texto, incluindo:
 Arquivos de texto puro (TXT, LOG, etc.).
@@ -766,117 +633,81 @@ Arquivos de dados estruturados como XML.
 Arquivos de dados estruturados como JSON.
 
 SERVIDOR WEB: HPROWS (ANTERIORMENTE HWSERVER)
-
 DEFINIÇÃO
 O HProWS é um servidor web totalmente desenvolvido pela HPro Informática. Sua principal função é atuar como a ponte de integração entre aplicações na internet e o banco de dados interno da empresa.
-
 CARACTERÍSTICAS PRINCIPAIS
-
 Alta Disponibilidade
 O servidor é projetado para alta disponibilidade, utilizando uma arquitetura multi-thread que permite o processamento de múltiplas requisições simultaneamente. Ele opera como um serviço padrão do Windows, garantindo sua execução contínua em segundo plano.
-
 Integração com o Banco de Dados
 Ele provê uma camada de integração direta com o banco de dados interno. Toda a lógica de backend e acesso aos dados é desenvolvida utilizando a linguagem Delphi padrão, com todos os recursos necessários disponibilizados pela HPro.
-
 Baixo Consumo de Recursos
 O HProWS é otimizado para ser leve, utilizando poucos recursos de hardware do servidor, como memória e processamento.
 
-Ok, vamos organizar estas diretrizes de desenvolvimento. São regras de negócio e padrões de codificação muito importantes.
-
-A estrutura abaixo foi criada para que o RAG possa consultar e extrair cada regra de forma isolada, como se fosse um manual de boas práticas da HPro.
-
 DIRETRIZES DE DESENVOLVIMENTO E REGRAS DE NEGÓCIO
-
 REGRAS DE USO DO DATAMODULO
-
 O DataModulo deve ser utilizado exclusivamente para hospedar os componentes de acesso a dados. Nenhuma outra lógica deve ser implementada nele.
-
 Proibido o uso de Range
 Nunca aplique faixas de dados (Range) em tabelas que residem no DataModulo.
-
 Proibida a mudança de Índice
 Nunca altere o índice ativo de tabelas que residem no DataModulo.
-
 Proibida a programação de Lógica
 Nunca implemente código ou regras de negócio diretamente nos eventos do DataModulo.
 
 REGRAS PARA COMPONENTES DE DADOS (TABELAS E GRIDS)
-
 Conexão de Grids
 Componentes visuais de grade (Grids) devem sempre estar conectados a componentes de tabela locais ao formulário, e não diretamente a tabelas no DataModulo.
-
 Abertura de Tabelas
 As tabelas devem ser abertas, preferencialmente, no evento OnCreate do formulário que as utiliza.
-
 Definição de Índices
 O índice de uma tabela deve ser definido no momento de sua abertura, antes do comando "Open". Esta regra se aplica em quase 100% dos casos.
 
 REGRAS GERAIS DE INTERFACE E FUNCIONALIDADE
-
 Nomenclatura de Tabelas e Campos
 Os nomes de tabelas e campos devem seguir estritamente as recomendações de nomenclatura da HPro (consultar documento anexo de padrões).
-
 Totalização de Valores em Consultas
 Em todas as telas de consulta que exibem valores numéricos (como financeiros ou de quantidade), deve existir um botão ou funcionalidade para "Totalizar" os valores exibidos.
-
 Totalização em Impressões
 Onde houver valores em relatórios ou listagens para impressão, os mesmos também deverão ser totalizados.
 
 REGRA DE FORMATAÇÃO DE DADOS (MÁSCARAS)
-
 Princípio:
 Ao utilizar máscaras de entrada de dados na interface do usuário, o valor deve ser sempre armazenado no banco de dados sem os caracteres da máscara. O dado deve ser salvo em seu formato puro.
-
 Exemplo Prático:
 Um valor exibido na tela como "05/002" deve ser gravado no banco de dados como "05002". A lógica para remover e aplicar a máscara deve existir na aplicação.
 
 DIRETRIZES DE INTERFACE DE USUÁRIO (UI) E FORMATAÇÃO
-
 LARGURA DE CAMPOS DE CÓDIGO
 Componentes do tipo Edit ou DBEdit que são utilizados para exibir ou inserir códigos devem ter uma largura mínima de 45 pixels.
-
 LARGURA DE COMPONENTE VIEW
 A largura padrão para componentes do tipo View deve ser de 300 pixels.
-
 LARGURA DE CAMPOS DE DATA
 Componentes do tipo MaskEdit ou DBEdit que representam datas devem ter uma largura padrão de 75 pixels.
-
 LARGURA DE CAMPOS DE VALOR DECIMAL
 Componentes do tipo EditNum ou DBEdit que representam valores com casas decimais devem ter uma largura mínima de 75 pixels.
-
 MÁSCARA PADRÃO PARA VALORES
 A máscara de formatação padrão para exibição de valores monetários ou decimais é: #,###,##0.00
 
 ESTRUTURA DA BIBLIOTECA HPRO
-
 A biblioteca HPro é composta por um conjunto de units (unidades de código), cada uma com uma responsabilidade específica. As units mais importantes são:
-
 HProFunc.pas
 Contém funções básicas e de utilização genérica, que podem ser aproveitadas em diversas partes de qualquer sistema.
-
 HProDB.pas
 Agrupa as funções relacionadas ao acesso, controle e manipulação de dados do banco de dados.
-
 HProWin.pas
 Contém funções de caráter visual, diretamente atreladas ao controle de componentes visuais do Windows (formulários, botões, grades, etc.).
-
 HProConst.pas
 Utilizada como um repositório central para armazenar as constantes e variáveis "públicas" (globais) do sistema.
 
 RESUMO DE FUNÇÕES DA UNIT HPROFUNC.PAS
-
 MENSAGENS E INTERAÇÃO COM USUÁRIO
-
 Atencao
 Exibe mensagens de aviso para o usuário e pode ser usada para solicitar confirmações (Sim/Não).
 Exemplo de código:
 Atencao('Númeração de controle da Nota Fiscal fora de sequência;;Entre em contato com o suporte técnico');
-
 Beep
 Emite um som de bip padrão do sistema.
 Exemplo de código:
 beep;
-
 ShowWait / HideWait
 Respectivamente, exibe e esconde a janela "Aguarde, processando..." para o usuário durante operações demoradas.
 Exemplo de código:
@@ -889,41 +720,32 @@ ShowWait('Aguarde, excluindo...');
 HideWait;
 
 CONVERSÃO DE TIPOS DE DADOS
-
 ctod
 Converte uma string (texto) em uma data.
 Exemplo de código:
 dAux := CtoD('01/04/2022');
-
 dtoc
 Converte uma data em uma string no formato dd/mm/aaaa.
 Exemplo de código:
 EDvd.Text := dtoc(Date);
-
 DateToSql (ou DtoSql)
 Converte uma data para o formato padrão SQL: aaaa-mm-dd.
-
 FloatToSql
 Converte um número de ponto flutuante (real) para o formato SQL, usando o ponto como separador decimal.
-
 Hton
 Converte uma string de tempo no formato "hh:mm" para um número, permitindo cálculos com horas.
-
 Ntoh
 Converte um número de volta para uma string de tempo no formato "hh:mm", usado em conjunto com a função Hton.
-
 Valor
 Converte uma string em um número com casas decimais.
 Exemplo de Código:
 nEmp := Valor('1.05');
-
 ValorInt
 Converte uma string em um número inteiro.
 Exemplo de Código:
 nEmp := ValorInt('1');
 
 TRATAMENTO DE STRINGS
-
 Empty
 Verifica se uma string, data ou número está vazio/nulo/zero. Retorna True se estiver vazio.
 Exemplo de código:
@@ -931,63 +753,48 @@ var cAux: String;
 begin
      cAux := OnlyNumber(ECpj.Text);
      if empty(cAux) then begin
-
 Fill
 Formata uma string com preenchimento de caracteres, útil para gerar arquivos com layouts de tamanho fixo.
-
 OnlyNumber
 Extrai e retorna apenas os caracteres numéricos de uma string. Exemplo: "12/1233-44" retorna "12123344".
-
 Parse
 Extrai um trecho de uma string com base em um caractere separador.
 Exemplo de código:
 cAux := TMem.Gets('Key');
 cEmp := Parse(cAux);
 cCad := Parse(cAux);
-
 Replicate
 Repete um caractere um determinado número de vezes. Exemplo: Replicate('*', 5) retorna "*****".
-
 Spaces
 Gera uma string contendo um número específico de espaços em branco.
-
 StrTran
 Substitui todas as ocorrências de um trecho de texto por outro dentro de uma string.
-
 Transform
 Aplica uma máscara de formatação a uma string de dados puros.
 
 MANIPULAÇÃO DE DATAS
-
 FirstDay
 Recebe uma data como parâmetro e retorna o primeiro dia do mês correspondente.
-
 LastDay
 Recebe uma data como parâmetro e retorna o último dia do mês correspondente.
 
 VALIDAÇÕES
-
 IsCGC ou IsCNPJ
 Verifica se um número de CNPJ fornecido é válido, incluindo a checagem do dígito verificador. Retorna True se for válido.
-
 IsCPF
 Verifica se um número de CPF fornecido é válido, incluindo a checagem do dígito verificador. Retorna True se for válido.
-
 IsContido
 Verifica se um determinado valor está contido dentro de um conjunto de valores.
 Exemplo de código:
 if IsContido(TIno.Gets('Cfo',1),['5','6','7']) then begin
 
 CONTROLE DE ACESSO
-
 Acesso
 Controla os direitos de acesso de um usuário a um determinado processo.
-
 IsAcesso
 Verifica se o usuário logado possui permissão para um processo específico.
 
 UTILITÁRIOS DIVERSOS
-
 DBGridColor
 Permite colorir uma linha inteira de um DBGrid com base em uma condição lógica.
 exemplo de código:
@@ -1029,13 +836,10 @@ Para suportar recursos específicos da HPro Informática e agilizar o desenvolvi
 O HproTable herda todas as funcionalidades do componente padrão do DBISAM e adiciona uma série de métodos e recursos adicionais para simplificar o código e aumentar a produtividade.
 
 OBTENDO VALORES DE CAMPOS: A SOLUÇÃO HPROTABLE
-
 O PROBLEMA COM O MÉTODO PADRÃO (FIELDBYNAME)
 O método padrão do Delphi para acessar o valor de um campo é Tabela.FieldByName('NomeDoCampo').AsTipo. A principal desvantagem deste método é que ele resulta em um código longo, repetitivo e de difícil leitura.
-
 A SOLUÇÃO: MÉTODOS "GET" SIMPLIFICADOS
 Para resolver este problema, o HproTable introduz um conjunto de métodos curtos e intuitivos para obter valores de campos, cada um específico para um tipo de dado.
-
 LISTA DE MÉTODOS "GET" DO HPROTABLE
 Geti
 Para obter valores do tipo Inteiro.
@@ -1049,7 +853,6 @@ Getk
 Para obter o valor de um campo já com a máscara de formatação aplicada.
 
 EXEMPLOS COMPARATIVOS
-
 Obtendo um valor Inteiro:
 Método Padrão: Tabela.FieldByName('Cod').AsInteger
 Método HproTable: Tabela.Geti('Cod')
@@ -1071,7 +874,6 @@ O método padrão do Delphi para atribuir um valor a um campo é Tabela.FieldByN
 
 A SOLUÇÃO: MÉTODOS "PUT" SIMPLIFICADOS
 O HproTable substitui a sintaxe padrão por métodos curtos que recebem o nome do campo e o valor a ser atribuído como parâmetros.
-
 LISTA DE MÉTODOS "PUT" DO HPROTABLE
 Puti
 Para atribuir valores do tipo Inteiro.

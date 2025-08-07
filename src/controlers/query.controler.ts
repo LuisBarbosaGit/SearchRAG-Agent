@@ -1,11 +1,11 @@
 import {Request, Response} from 'express'
 import { llmModel } from '../services/answer.services';
-import { mainServices } from '../services/answer.services';
+import { answerServices } from '../services/answer.services';
 
 export class MainControler{
     static async processQuery(req: Request, res : Response){
         let query = req.body.query;
-        const response = await new mainServices().manageSearch(query)
+        const response = await new answerServices().manageSearch(query)
         res.send({
         question: query,
         message: "Success",
