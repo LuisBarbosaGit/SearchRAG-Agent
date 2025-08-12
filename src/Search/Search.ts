@@ -17,7 +17,7 @@ export const reranker = new CohereRerank({
 
 export async function searchChunks(query: string): Promise<any> {
     //This aux llm will catch the user query and use to generate a more detailed prompt, which will be serach on vector store
-    const preparePrompt = `Você é um agente auxiliar de um sistema rag, com base na pergunta ${query}, gere 4 versões alternativas e mais detalhadas visando melhorar a busca sem alterar o sentido, não adicione nada além das 4 versões alternativas.`;
+    const preparePrompt = `Você é um agente auxiliar de um sistema rag em uma empresa de desenvolvimento de software, com base na pergunta ${query}, gere 4 versões alternativas e mais detalhadas visando melhorar a busca sem alterar o sentido, não adicione nada além das 4 versões alternativas.`;
     const improvedQuery = await llmQueryTransformer.invoke(preparePrompt);
 
     const finalQuery : string = improvedQuery.content as string;
@@ -28,5 +28,4 @@ export async function searchChunks(query: string): Promise<any> {
 
     const rerankedDocs = await reranker.compressDocuments(docs, finalQuery);
     return rerankedDocs;
-    
 }
