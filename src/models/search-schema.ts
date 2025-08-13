@@ -1,6 +1,5 @@
 import {z} from 'zod';
 
 export const SearchSchema = z.object({
-    message: z.string().describe("Resposta gerada"),
-    code : z.string().describe("Exemplo de codigo, caso tenha algum na resposta"),
+    message: z.string().describe("Resposta gerada")
 })

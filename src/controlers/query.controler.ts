@@ -13,13 +13,12 @@ export class MainControler{
             for await (const chunks of response){
                 res.write(JSON.stringify(chunks))
             }
-
         }
         finally{
             res.end();
         }
 
-        }
+    }
 
     static getConfig(req :Request, res: Response){
         res.send({
